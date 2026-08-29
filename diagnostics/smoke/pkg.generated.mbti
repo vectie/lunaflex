@@ -1,0 +1,34 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/lunaflex/diagnostics/smoke"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn run_reference_smoke() -> ReferenceSmokeReport raise
+
+// Errors
+pub(all) suberror ReferenceSmokeError {
+  UnexpectedOperationCount(expected~ : Int, actual~ : Int)
+  UnexpectedSelection(expected~ : Int, actual~ : Int)
+  UnexpectedGeneratedCount(expected~ : Int, actual~ : Int)
+  UnexpectedGeneratedToken(position~ : Int, expected~ : Int, actual~ : Int)
+} derive(Eq, @debug.Debug)
+
+// Types and methods
+pub struct ReferenceSmokeReport {
+  core_version : String
+  operation_count : Int
+  input_tokens : Int
+  generated_tokens : ReadOnlyArray[Int]
+} derive(Eq, @debug.Debug)
+pub fn ReferenceSmokeReport::core_version(Self) -> String
+pub fn ReferenceSmokeReport::generated_tokens(Self) -> ReadOnlyArray[Int]
+pub fn ReferenceSmokeReport::input_tokens(Self) -> Int
+pub fn ReferenceSmokeReport::operation_count(Self) -> Int
+pub fn ReferenceSmokeReport::summary(Self) -> String
+
+// Type aliases
+
+// Traits

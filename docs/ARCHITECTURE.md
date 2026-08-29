@@ -24,3 +24,15 @@ deterministic correctness tests.
 
 Multi-GPU collectives, quantized execution, serving protocols, deployment, and
 fleet policy remain outside this repository.
+
+## Consumer integration
+
+LunaFlex is consumed as a normal MoonBit module and linked into its host. The
+root package exposes a small ABI/capability contract so a host can fail its
+build or startup acceptance checks when the required core envelope changes.
+This is compile-time composition, not runtime dynamic-library loading.
+
+Concrete model, scheduler, and device types remain owned by their focused
+LunaFlex packages. Consumers should migrate whole owning-package boundaries;
+they must not translate between duplicate LunaFlux and LunaFlex nominal types
+inside the token-step path.

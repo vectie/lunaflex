@@ -36,6 +36,19 @@ The package layout and dependency rules are documented in
 
 ## Validation
 
+Run the deterministic tiny-Llama acceptance path:
+
+~~~sh
+moon run --target native cmd/lunaflex_smoke
+~~~
+
+It builds a BF16 Llama plan, admits a safetensors fixture, executes the CPU
+reference graph, performs greedy sampling, and generates three tokens. It is a
+functional smoke check rather than a performance benchmark or physical-CUDA
+qualification.
+
+The complete validation boundary is:
+
 ~~~sh
 moon info
 moon fmt

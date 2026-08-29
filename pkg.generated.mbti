@@ -6,9 +6,13 @@ import {
 }
 
 // Values
+pub fn core_abi_version() -> Int
+
 pub fn core_capabilities() -> ReadOnlyArray[CoreCapability]
 
 pub fn core_version() -> String
+
+pub fn is_core_compatible(Int, ArrayView[CoreCapability]) -> Bool
 
 // Errors
 

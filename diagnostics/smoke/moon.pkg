@@ -1,0 +1,13 @@
+import {
+  "vectie/lunaflex",
+  "vectie/lunaflex/engine/reference",
+  "vectie/lunaflex/kernels/reference" @refkernels,
+  "vectie/lunaflex/model/llama",
+  "vectie/lunaflex/model/llama_weights",
+  "vectie/lunaflex/model/materialize",
+  "vectie/lunaflex/model/safetensors",
+  "vectie/lunaflex/model/spec",
+  "vectie/lunaflex/sampling",
+}
+
+supported_targets = "native"
