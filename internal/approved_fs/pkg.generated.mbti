@@ -1,0 +1,50 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/lunaflex/internal/approved_fs"
+
+import {
+  "moonbitlang/core/ref",
+  "vectie/lunaflex/internal/approved_fs_capability",
+  "vectie/lunaflex/runtime/approved_fs_inheritance",
+}
+
+// Values
+pub fn acquire_prepared_worker_roots(@approved_fs_inheritance.WorkerApprovedRoots, @approved_fs_capability.NativeApprovedHandle, @approved_fs_capability.NativeApprovedHandle) -> Int
+
+pub fn acquire_worker_roots(@approved_fs_capability.NativeApprovedHandle, @approved_fs_capability.NativeApprovedHandle, @ref.Ref[Int]) -> @approved_fs_inheritance.WorkerApprovedRoots
+
+pub fn close(@approved_fs_capability.NativeApprovedHandle) -> Int
+
+pub fn close_worker_roots(@approved_fs_inheritance.WorkerApprovedRoots) -> Int
+
+pub fn duplicate_worker_root(@approved_fs_inheritance.WorkerApprovedRoots, Int, @ref.Ref[Int]) -> @approved_fs_capability.NativeApprovedHandle
+
+pub fn is_closed(@approved_fs_capability.NativeApprovedHandle) -> Bool
+
+pub fn open_file(@approved_fs_capability.NativeApprovedHandle, Bytes, @ref.Ref[Int]) -> @approved_fs_capability.NativeApprovedHandle
+
+pub fn open_inherited_root(Int, @ref.Ref[Int]) -> @approved_fs_capability.NativeApprovedHandle
+
+pub fn open_root(Bytes, @ref.Ref[Int]) -> @approved_fs_capability.NativeApprovedHandle
+
+pub fn prepare_worker_roots() -> @approved_fs_inheritance.WorkerApprovedRoots
+
+pub fn read_exact_at(@approved_fs_capability.NativeApprovedHandle, FixedArray[Byte], Int, Int, Int64) -> Int
+
+pub fn read_immutable_snapshot(@approved_fs_capability.NativeApprovedHandle, Int64, @ref.Ref[Int]) -> Bytes
+
+pub fn require_absolute_identity(@approved_fs_capability.NativeApprovedHandle, Bytes) -> Int
+
+pub fn stamp(@approved_fs_capability.NativeApprovedHandle, FixedArray[Int64]) -> Int
+
+pub fn worker_root_spawn_authority(@approved_fs_inheritance.WorkerApprovedRoots) -> @approved_fs_inheritance.WorkerApprovedRootSpawnAuthority
+
+pub fn worker_roots_is_closed(@approved_fs_inheritance.WorkerApprovedRoots) -> Bool
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+pub using @approved_fs_capability {type NativeApprovedHandle as ApprovedHandle}
+
+// Traits

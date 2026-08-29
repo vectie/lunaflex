@@ -1,0 +1,9 @@
+import {
+  "vectie/lunaflex/internal/canonical_sha256",
+}
+
+import {
+  "moonbitlang/x/crypto",
+} for "test"
+
+supported_targets = "native"

@@ -1,0 +1,28 @@
+import {
+  "vectie/lunaflex/device",
+  "vectie/lunaflex/model/llama_weights",
+  "vectie/lunaflex/model/numeric_contract",
+  "vectie/lunaflex/model/plan",
+  "vectie/lunaflex/model/safetensors",
+  "vectie/lunaflex/model/safetensors_reader",
+  "vectie/lunaflex/model/spec",
+  "vectie/lunaflex/runtime/approved_fs",
+  "moonbitlang/x/crypto",
+}
+
+import {
+  "vectie/lunaflex/model/llama",
+  "vectie/lunaflex/model/plan_test_fixture",
+  "vectie/lunaflex/model/safetensors",
+} for "test"
+
+import {
+  "moonbitlang/async",
+  "moonbitlang/async/fs",
+  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/x/crypto",
+  "vectie/lunaflex/model/llama",
+  "vectie/lunaflex/model/safetensors",
+} for "wbtest"
+
+supported_targets = "native"

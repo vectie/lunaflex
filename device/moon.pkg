@@ -1,0 +1,6 @@
+import {
+  "moonbitlang/x/crypto",
+  "vectie/lunaflex/internal/cuda",
+}
+
+supported_targets = "native"

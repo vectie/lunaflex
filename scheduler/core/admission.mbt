@@ -1,0 +1,343 @@
+///|
+fn Scheduler::preflight_admission_request(
+  self : Scheduler,
+  request : TokenizedRequest,
+) -> Unit raise SchedulerError {
+  self.require_no_cancel_reservation()
+  if request.model_identity() != self.model_identity {
+    raise invalid(ModelIdentity, Mismatch)
+  }
+  if self.find_request(request.request_id()) != NO_INDEX {
+    raise invalid(Request, Duplicate)
+  }
+  if self.waiting_count >= self.capacity.max_waiting_requests() {
+    raise invalid(WaitingCapacity, Exhausted)
+  }
+  if self.free_head == NO_INDEX {
+    raise invalid(RequestCapacity, Exhausted)
+  }
+  if self.generation_cursor == MAX_GENERATION {
+    raise invalid(RequestGeneration, Exhausted)
+  }
+  let context = request.effective_limits().context_ceiling()
+  let prompt_tokens = request.input_tokens().length()
+  let maximum_token = request.input_maximum_token_status(
+    self.capacity.worker_max_token_id(),
+  )
+  if maximum_token.is_stale() {
+    raise invalid(Request, Stale)
+  }
+  if maximum_token.is_out_of_range() || !maximum_token.is_within_bound() {
+    raise invalid(Request, OutOfRange)
+  }
+  if !request.semantic_stop_tokens_live() {
+    raise invalid(Request, Stale)
+  }
+  let maximum_sequence_tokens = prompt_tokens +
+    request.effective_limits().max_new_tokens()
+  let prompt_pages = ceiling_pages(
+    prompt_tokens,
+    self.capacity.tokens_per_page(),
+  )
+  let maximum_sequence_pages = ceiling_pages(
+    maximum_sequence_tokens,
+    self.capacity.tokens_per_page(),
+  )
+  if context > self.capacity.model_max_sequence_tokens() ||
+    ceiling_pages(context, self.capacity.tokens_per_page()) >
+    self.capacity.block_table_pages_per_request() ||
+    prompt_pages >
+    self.capacity.total_page_count() -
+    self.capacity.emergency_decode_page_reserve() ||
+    maximum_sequence_pages > self.capacity.total_page_count() {
+    raise invalid(Context, OutOfRange)
+  }
+}
+
+///|
+fn Scheduler::install_admission_request(
+  self : Scheduler,
+  request : TokenizedRequest,
+  retained_index : Int,
+) -> Int {
+  let deadline = request.admission_deadline().at_millis()
+  let generation = try! self.allocate_request_generation()
+  let index = try! self.allocate_slot()
+  if index != retained_index || !self.request_stop_tokens[index].is_live() {
+    abort("scheduler stop-token install invariant")
+  }
+  self.slot_states[index] = SLOT_WAITING
+  self.requests[index] = Some(request)
+  self.request_generations[index] = generation
+  self.deadlines[index] = deadline
+  self.admitted_steps[index] = self.step
+  self.processed_inputs[index] = 0
+  self.prefill_cursors[index] = self.prefix_matched_tokens[index]
+  self.live_count += 1
+  self.enqueue_waiting(index)
+  self.deadline_insert(index)
+  index
+}
+
+///|
+fn Scheduler::commit_admission_request(
+  self : Scheduler,
+  request : TokenizedRequest,
+  now_millis : UInt64,
+) -> Unit raise SchedulerError {
+  self.preflight_admission_request(request)
+  if request.admission_deadline().is_expired(now_millis) {
+    raise invalid(Deadline, Expired)
+  }
+  let retained_index = self.free_head
+  request.retain_stop_tokens_into(self.request_stop_tokens[retained_index])
+  self.discover_prefix_candidate(request, retained_index) catch {
+    error => release_admission_stop_tokens(self, retained_index, error)
+  }
+  ignore(self.install_admission_request(request, retained_index))
+}
+
+///|
+fn[T] release_admission_stop_tokens(
+  scheduler : Scheduler,
+  retained_index : Int,
+  error : SchedulerError,
+) -> T raise SchedulerError {
+  try! scheduler.request_stop_tokens[retained_index].release()
+  raise error
+}
+
+///|
+pub fn Scheduler::prepare_admission(
+  self : Scheduler,
+  request : TokenizedRequest,
+) -> PreparedAdmission {
+  {
+    owner: self,
+    request,
+    handle: {
+      slot: SchedulerSlotId(NO_INDEX, 0),
+      request_id: request.request_id(),
+      request_generation: @inference.RequestGeneration::initial(),
+    },
+    committed: false,
+    retention_issued: false,
+    publication_route: empty_publication_route(),
+  }
+}
+
+///|
+/// Binds the caller's fixed publication route before scheduler mutation.
+pub fn PreparedAdmission::bind_publication_route(
+  self : PreparedAdmission,
+  route : SchedulerPublicationRoute,
+) -> Unit raise SchedulerError {
+  if self.committed || self.publication_route.generation() != 0UL {
+    raise invalid(Request, InvalidTransition)
+  }
+  self.publication_route = route
+}
+
+///|
+/// Acquires the online worker's independent semantic retention before commit.
+pub fn PreparedAdmission::retain_stop_tokens_into(
+  self : PreparedAdmission,
+  slot : @inference.LunaRequestStopTokenRetentionSlot,
+) -> Unit raise SchedulerError {
+  if self.committed || self.retention_issued {
+    raise invalid(Request, InvalidTransition)
+  }
+  self.request.retain_stop_tokens_into(slot)
+  self.retention_issued = true
+}
+
+///|
+pub fn Scheduler::commit_admission(
+  self : Scheduler,
+  prepared : PreparedAdmission,
+  now_millis : UInt64,
+) -> Unit raise SchedulerError {
+  if !physical_equal(prepared.owner, self) || prepared.committed {
+    raise invalid(Request, InvalidTransition)
+  }
+  self.commit_admission_request(prepared.request, now_millis)
+  let index = self.find_request(prepared.request.request_id())
+  if index == NO_INDEX {
+    abort("prepared scheduler admission invariant")
+  }
+  prepared.handle.slot = SchedulerSlotId(index, self.slot_generations[index])
+  prepared.handle.request_generation = self.request_generations[index]
+  self.publication_route_lanes[index] = prepared.publication_route.lane()
+  self.publication_route_generations[index] = prepared.publication_route.generation()
+  prepared.committed = true
+}
+
+///|
+pub fn PreparedAdmission::request_handle(
+  self : PreparedAdmission,
+) -> RequestHandle raise SchedulerError {
+  if !self.committed {
+    raise invalid(Request, InvalidTransition)
+  }
+  self.handle
+}
+
+///|
+pub fn Scheduler::prepare_exclusive_admission(
+  self : Scheduler,
+  request : TokenizedRequest,
+) -> PreparedExclusiveAdmission raise SchedulerError {
+  self.preflight_admission_request(request)
+  let prepared : PreparedExclusiveAdmission = {
+    owner: self,
+    request,
+    handle: {
+      slot: SchedulerSlotId(NO_INDEX, 0),
+      request_id: request.request_id(),
+      request_generation: @inference.RequestGeneration::initial(),
+    },
+    committed: false,
+    consumed: false,
+    retention_issued: false,
+    publication_route: empty_publication_route(),
+  }
+  self.exclusive_admission_reserved = true
+  prepared
+}
+
+///|
+pub fn PreparedExclusiveAdmission::bind_publication_route(
+  self : PreparedExclusiveAdmission,
+  route : SchedulerPublicationRoute,
+) -> Unit raise SchedulerError {
+  if self.consumed ||
+    self.publication_route.generation() != 0UL ||
+    !self.owner.exclusive_admission_reserved {
+    raise invalid(Request, InvalidTransition)
+  }
+  self.publication_route = route
+}
+
+///|
+/// Acquires the online worker's independent semantic retention while this
+/// exact exclusive reservation remains live and unconsumed.
+pub fn PreparedExclusiveAdmission::retain_stop_tokens_into(
+  self : PreparedExclusiveAdmission,
+  slot : @inference.LunaRequestStopTokenRetentionSlot,
+) -> Unit raise SchedulerError {
+  if self.consumed ||
+    self.retention_issued ||
+    !self.owner.exclusive_admission_reserved {
+    raise invalid(Request, InvalidTransition)
+  }
+  self.request.retain_stop_tokens_into(slot)
+  self.retention_issued = true
+}
+
+///|
+/// Commits the exclusively retained shell after reauthenticating its token
+/// backing. No scheduler mutation can intervene, but an outer retained Luna
+/// lease alias may invalidate the backing while rooted startup is in progress.
+pub fn Scheduler::commit_exclusive_admission(
+  self : Scheduler,
+  prepared : PreparedExclusiveAdmission,
+  now_millis : UInt64,
+) -> ExclusiveAdmissionCommit {
+  if !physical_equal(prepared.owner, self) ||
+    prepared.consumed ||
+    !self.exclusive_admission_reserved {
+    return ExclusiveAdmissionInvalidated
+  }
+  let maximum_token = prepared.request.input_maximum_token_status(
+    self.capacity.worker_max_token_id(),
+  )
+  if !maximum_token.is_within_bound() ||
+    !prepared.request.semantic_stop_tokens_live() {
+    self.exclusive_admission_reserved = false
+    prepared.consumed = true
+    return ExclusiveAdmissionInvalidated
+  }
+  if prepared.request.admission_deadline().is_expired(now_millis) {
+    self.exclusive_admission_reserved = false
+    prepared.consumed = true
+    return ExclusiveAdmissionExpired
+  }
+  let retained_index = self.free_head
+  try
+    prepared.request.retain_stop_tokens_into(
+      self.request_stop_tokens[retained_index],
+    )
+  catch {
+    _ => {
+      self.exclusive_admission_reserved = false
+      prepared.consumed = true
+      return ExclusiveAdmissionInvalidated
+    }
+  } noraise {
+    _ => ()
+  }
+  try self.discover_prefix_candidate(prepared.request, retained_index) catch {
+    _ => {
+      try! self.request_stop_tokens[retained_index].release()
+      self.exclusive_admission_reserved = false
+      prepared.consumed = true
+      return ExclusiveAdmissionInvalidated
+    }
+  } noraise {
+    _ => ()
+  }
+  let index = self.install_admission_request(prepared.request, retained_index)
+  prepared.handle.slot = SchedulerSlotId(index, self.slot_generations[index])
+  prepared.handle.request_generation = self.request_generations[index]
+  self.publication_route_lanes[index] = prepared.publication_route.lane()
+  self.publication_route_generations[index] = prepared.publication_route.generation()
+  prepared.committed = true
+  prepared.consumed = true
+  self.exclusive_admission_reserved = false
+  ExclusiveAdmissionCommitted
+}
+
+///|
+pub fn Scheduler::abort_exclusive_admission(
+  self : Scheduler,
+  prepared : PreparedExclusiveAdmission,
+) -> Unit {
+  if !physical_equal(prepared.owner, self) ||
+    prepared.consumed ||
+    !self.exclusive_admission_reserved {
+    return
+  }
+  self.exclusive_admission_reserved = false
+  prepared.consumed = true
+}
+
+///|
+pub fn Scheduler::has_exclusive_admission(
+  self : Scheduler,
+  prepared : PreparedExclusiveAdmission,
+) -> Bool {
+  physical_equal(prepared.owner, self) &&
+  self.exclusive_admission_reserved &&
+  !prepared.consumed
+}
+
+///|
+pub fn PreparedExclusiveAdmission::request_handle(
+  self : PreparedExclusiveAdmission,
+) -> RequestHandle {
+  if !self.committed {
+    abort("exclusive scheduler handle invariant")
+  }
+  self.handle
+}
+
+///|
+pub fn Scheduler::admit(
+  self : Scheduler,
+  request : TokenizedRequest,
+  now_millis : UInt64,
+) -> RequestHandle raise SchedulerError {
+  let prepared = self.prepare_admission(request)
+  self.commit_admission(prepared, now_millis)
+  prepared.request_handle()
+}

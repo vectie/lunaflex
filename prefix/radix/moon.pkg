@@ -1,0 +1,8 @@
+import {
+  "vectie/lunaflex/model/spec",
+  "vectie/lunaflex/tokenizer",
+  "vectie/lunaflex/contracts/inference",
+  "vectie/lunaflex/kv/page_allocator",
+}
+
+supported_targets = "native"

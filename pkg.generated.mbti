@@ -1,0 +1,27 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/lunaflex"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn core_capabilities() -> ReadOnlyArray[CoreCapability]
+
+pub fn core_version() -> String
+
+// Errors
+
+// Types and methods
+pub(all) enum CoreCapability {
+  DenseBf16
+  SingleCudaDevice
+  ContinuousBatching
+  PagedKvMetadata
+  PrefixReuse
+  AotExecution
+} derive(Eq, @debug.Debug)
+
+// Type aliases
+
+// Traits

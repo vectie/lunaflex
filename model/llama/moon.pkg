@@ -1,0 +1,7 @@
+import {
+  "vectie/lunaflex/model/spec",
+  "vectie/lunaflex/model/plan",
+  "vectie/lunaflex/model/numeric_contract",
+}
+
+supported_targets = "native"

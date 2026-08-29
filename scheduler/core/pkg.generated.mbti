@@ -1,0 +1,330 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/lunaflex/scheduler/core"
+
+import {
+  "moonbitlang/core/debug",
+  "vectie/lunaflex/config/runtime_resolved",
+  "vectie/lunaflex/contracts/inference",
+  "vectie/lunaflex/engine/worker_protocol",
+  "vectie/lunaflex/kv/block_table",
+  "vectie/lunaflex/kv/page_allocator",
+  "vectie/lunaflex/model/spec",
+  "vectie/lunaflex/tokenizer",
+}
+
+// Values
+
+// Errors
+pub(all) suberror SchedulerError {
+  Invalid(field~ : SchedulerField, issue~ : SchedulerIssue)
+  PageAllocator(@page_allocator.PageAllocatorError)
+  BlockTable(@block_table.BlockTableError)
+  WorkerProtocol(@worker_protocol.WorkerProtocolError)
+} derive(Eq, @debug.Debug)
+
+// Types and methods
+pub enum BuildNextOutcome {
+  BuildIdle
+  BuildBackpressured
+  BuildPreempted
+  BuildSubmitted(Int, UInt64)
+}
+pub fn BuildNextOutcome::is_backpressured(Self) -> Bool
+pub fn BuildNextOutcome::is_idle(Self) -> Bool
+pub fn BuildNextOutcome::is_preempted(Self) -> Bool
+pub fn BuildNextOutcome::is_submitted(Self) -> Bool
+
+pub(all) enum CancelReservationCommit {
+  CancelCommitted(@inference.RequestGeneration)
+  CancelReservationAbsent
+} derive(Eq, @debug.Debug)
+
+pub(all) enum CancelReservationStart {
+  CancelReserved
+  CancelNaturalTerminal
+} derive(Eq, @debug.Debug)
+
+pub(all) enum CompletionCommit {
+  CompletionCommitted
+  CompletionBackpressured
+} derive(Eq, @debug.Debug)
+
+pub(all) enum ExactDeadlineResult {
+  ExactDeadlinePending
+  ExactDeadlineExpired(@inference.RequestGeneration)
+  ExactDeadlineNaturalTerminal
+} derive(Eq, @debug.Debug)
+
+pub(all) enum ExactDeviceInvalidation {
+  ExactDeviceNoChange
+  ExactDeviceInvalidated(Int, @inference.RequestGeneration)
+  ExactDeviceAlreadyTerminal(@inference.RequestGeneration)
+} derive(Eq, @debug.Debug)
+
+pub(all) enum ExactInstanceLossDrain {
+  ExactLossRemaining(Int, @inference.RequestGeneration)
+  ExactLossComplete(@inference.RequestGeneration)
+} derive(Eq, @debug.Debug)
+
+pub(all) enum ExclusiveAdmissionCommit {
+  ExclusiveAdmissionCommitted
+  ExclusiveAdmissionExpired
+  ExclusiveAdmissionInvalidated
+} derive(Eq, @debug.Debug)
+
+pub struct GeneratedTokenNotice(@inference.RequestId, @inference.RequestGeneration, Int, Int, UInt64) derive(Eq)
+pub fn GeneratedTokenNotice::position(Self) -> Int
+pub fn GeneratedTokenNotice::publication_sequence(Self) -> UInt64
+pub fn GeneratedTokenNotice::request_generation(Self) -> @inference.RequestGeneration
+pub fn GeneratedTokenNotice::request_id(Self) -> @inference.RequestId
+pub fn GeneratedTokenNotice::token_id(Self) -> Int
+
+pub(all) enum InstanceLossDrain {
+  Remaining(Int)
+  Complete
+} derive(Eq, @debug.Debug)
+
+pub struct LunaSchedulerPlanTelemetry {
+  // private fields
+}
+pub fn LunaSchedulerPlanTelemetry::last_plan_rows(Self) -> Int
+pub fn LunaSchedulerPlanTelemetry::last_plan_sequence(Self) -> UInt64
+pub fn LunaSchedulerPlanTelemetry::last_plan_tokens(Self) -> Int
+
+pub struct LunaSchedulerTelemetry {
+  // private fields
+}
+pub fn LunaSchedulerTelemetry::active_requests(Self) -> Int
+pub fn LunaSchedulerTelemetry::kv_pages_free(Self) -> Int
+pub fn LunaSchedulerTelemetry::kv_pages_used(Self) -> Int
+pub fn LunaSchedulerTelemetry::prefix_entries(Self) -> Int
+pub fn LunaSchedulerTelemetry::prefix_evictions(Self) -> UInt64
+pub fn LunaSchedulerTelemetry::prefix_hits(Self) -> UInt64
+pub fn LunaSchedulerTelemetry::prefix_lookups(Self) -> UInt64
+pub fn LunaSchedulerTelemetry::prefix_misses(Self) -> UInt64
+pub fn LunaSchedulerTelemetry::prefix_pages(Self) -> Int
+pub fn LunaSchedulerTelemetry::prefix_publications(Self) -> UInt64
+pub fn LunaSchedulerTelemetry::prefix_tokens_computed(Self) -> UInt64
+pub fn LunaSchedulerTelemetry::prefix_tokens_reused(Self) -> UInt64
+pub fn LunaSchedulerTelemetry::queue_depth(Self) -> Int
+
+pub struct PreparedAdmission {
+  // private fields
+}
+pub fn PreparedAdmission::bind_publication_route(Self, SchedulerPublicationRoute) -> Unit raise SchedulerError
+pub fn PreparedAdmission::request_handle(Self) -> RequestHandle raise SchedulerError
+pub fn PreparedAdmission::retain_stop_tokens_into(Self, @inference.LunaRequestStopTokenRetentionSlot) -> Unit raise SchedulerError
+
+pub struct PreparedExclusiveAdmission {
+  // private fields
+}
+pub fn PreparedExclusiveAdmission::bind_publication_route(Self, SchedulerPublicationRoute) -> Unit raise SchedulerError
+pub fn PreparedExclusiveAdmission::request_handle(Self) -> RequestHandle
+pub fn PreparedExclusiveAdmission::retain_stop_tokens_into(Self, @inference.LunaRequestStopTokenRetentionSlot) -> Unit raise SchedulerError
+
+pub struct RequestHandle {
+  mut slot : SchedulerSlotId
+  request_id : @inference.RequestId
+  mut request_generation : @inference.RequestGeneration
+} derive(Eq, @debug.Debug)
+pub fn RequestHandle::request_generation(Self) -> @inference.RequestGeneration
+pub fn RequestHandle::request_id(Self) -> @inference.RequestId
+pub fn RequestHandle::slot(Self) -> SchedulerSlotId
+
+pub struct RequestStatus {
+  handle : RequestHandle
+  state : SchedulerRequestState
+  input_tokens : Int
+  processed_input_tokens : Int
+  cached_input_tokens : Int
+  output_tokens : Int
+  deadline_at_millis : UInt64
+  in_flight : Bool
+} derive(Eq, @debug.Debug)
+pub fn RequestStatus::cached_input_tokens(Self) -> Int
+pub fn RequestStatus::deadline_at_millis(Self) -> UInt64
+pub fn RequestStatus::handle(Self) -> RequestHandle
+pub fn RequestStatus::in_flight(Self) -> Bool
+pub fn RequestStatus::input_tokens(Self) -> Int
+pub fn RequestStatus::output_tokens(Self) -> Int
+pub fn RequestStatus::processed_input_tokens(Self) -> Int
+pub fn RequestStatus::state(Self) -> SchedulerRequestState
+
+pub struct Scheduler {
+  // private fields
+}
+pub fn Scheduler::abort_cancel_reservation(Self) -> Unit
+pub fn Scheduler::abort_exclusive_admission(Self, PreparedExclusiveAdmission) -> Unit
+pub fn Scheduler::admit(Self, TokenizedRequest, UInt64) -> RequestHandle raise SchedulerError
+pub fn Scheduler::advance_terminated_handle(Self, RequestHandle, @inference.RequestGeneration) -> Unit raise SchedulerError
+pub fn Scheduler::allocated_block_table_count(Self) -> Int
+pub fn Scheduler::build_next(Self) -> BuildNextOutcome raise SchedulerError
+pub fn Scheduler::cancel(Self, RequestHandle) -> Unit raise SchedulerError
+pub fn Scheduler::cancel_exact(Self, RequestHandle) -> @inference.RequestGeneration raise SchedulerError
+pub fn Scheduler::commit_admission(Self, PreparedAdmission, UInt64) -> Unit raise SchedulerError
+pub fn Scheduler::commit_cancel_reservation(Self) -> CancelReservationCommit
+pub fn Scheduler::commit_exclusive_admission(Self, PreparedExclusiveAdmission, UInt64) -> ExclusiveAdmissionCommit
+pub fn Scheduler::complete(Self, @worker_protocol.SubmittedSchedulePlan, @worker_protocol.SubmittedCompletion) -> CompletionCommit raise SchedulerError
+pub fn Scheduler::complete_submitted(Self, @worker_protocol.SubmittedSchedulePlan) -> CompletionCommit raise SchedulerError
+pub fn Scheduler::completion_writer(Self, @worker_protocol.SubmittedSchedulePlan) -> @worker_protocol.CompletionWriter raise SchedulerError
+pub fn Scheduler::drain_instance_loss(Self) -> InstanceLossDrain raise SchedulerError
+pub fn Scheduler::drain_instance_loss_exact(Self, RequestHandle) -> ExactInstanceLossDrain raise SchedulerError
+pub fn Scheduler::expire_deadlines(Self, UInt64) -> Int raise SchedulerError
+pub fn Scheduler::expire_exact(Self, RequestHandle, UInt64) -> @inference.RequestGeneration? raise SchedulerError
+pub fn Scheduler::expire_exact_or_natural(Self, RequestHandle, UInt64) -> ExactDeadlineResult raise SchedulerError
+pub fn Scheduler::fail_plan(Self, @worker_protocol.SubmittedSchedulePlan, @worker_protocol.WorkerFailure) -> Unit raise SchedulerError
+pub fn Scheduler::free_page_count(Self) -> Int
+pub fn Scheduler::generated_token_count(Self) -> Int
+pub fn Scheduler::has_exact_natural_terminal(Self, RequestHandle) -> Bool
+pub fn Scheduler::has_exclusive_admission(Self, PreparedExclusiveAdmission) -> Bool
+pub fn Scheduler::invalidate_device_state(Self) -> Int raise SchedulerError
+pub fn Scheduler::invalidate_device_state_exact(Self, RequestHandle) -> ExactDeviceInvalidation raise SchedulerError
+pub fn Scheduler::is_pristine(Self) -> Bool
+pub fn Scheduler::is_quiescent(Self) -> Bool
+pub fn Scheduler::last_retired_plan_sequence(Self) -> UInt64
+pub fn Scheduler::last_submitted_plan_sequence(Self) -> UInt64
+pub fn Scheduler::live_request_count(Self) -> Int
+pub fn Scheduler::luna_plan_telemetry(Self) -> LunaSchedulerPlanTelemetry
+pub fn Scheduler::luna_telemetry(Self) -> LunaSchedulerTelemetry
+pub fn Scheduler::model_identity(Self) -> @spec.ModelIdentity
+pub fn Scheduler::model_plan_generation(Self) -> @worker_protocol.ModelPlanGeneration
+pub fn Scheduler::new(@runtime_resolved.ResolvedRuntimeCapacity, @spec.ModelIdentity, @worker_protocol.ModelPlanGeneration, @worker_protocol.RowCapabilityRecipe, @worker_protocol.RowCapabilityRecipe, @worker_protocol.RowCapabilityRecipe) -> Self raise SchedulerError
+pub fn Scheduler::next_publication_kind(Self) -> SchedulerPublicationKind raise SchedulerError
+pub fn Scheduler::next_publication_route(Self) -> SchedulerPublicationRoute raise SchedulerError
+pub fn Scheduler::plan_buffer_binding(Self) -> SchedulerPlanBufferBinding
+pub fn Scheduler::prepare_admission(Self, TokenizedRequest) -> PreparedAdmission
+pub fn Scheduler::prepare_exclusive_admission(Self, TokenizedRequest) -> PreparedExclusiveAdmission raise SchedulerError
+pub fn Scheduler::replace_submitted_completion_with_failure(Self, @worker_protocol.SubmittedSchedulePlan, @worker_protocol.WorkerFailure) -> Unit raise SchedulerError
+pub fn Scheduler::reserve_cancel_exact(Self, RequestHandle) -> CancelReservationStart raise SchedulerError
+pub fn Scheduler::status(Self, @inference.RequestId) -> RequestStatus?
+pub fn Scheduler::submitted_plan(Self, BuildNextOutcome) -> @worker_protocol.SubmittedSchedulePlan raise SchedulerError
+pub fn Scheduler::submitted_plan_for_sequence(Self, UInt64) -> @worker_protocol.SubmittedSchedulePlan raise SchedulerError
+pub fn Scheduler::take_generated_token(Self) -> GeneratedTokenNotice raise SchedulerError
+pub fn Scheduler::take_next_publication(Self) -> SchedulerPublication raise SchedulerError
+pub fn Scheduler::take_reserved_generated_token(Self) -> GeneratedTokenNotice raise SchedulerError
+pub fn Scheduler::take_terminal_notice(Self) -> TerminalNotice raise SchedulerError
+pub fn Scheduler::terminal_notice_count(Self) -> Int
+pub fn Scheduler::waiting_request_count(Self) -> Int
+pub fn Scheduler::worker_protocol_limits(Self) -> @worker_protocol.WorkerProtocolLimits
+
+pub struct SchedulerBlueprint {
+  // private fields
+}
+pub fn SchedulerBlueprint::instantiate(Self) -> Scheduler raise SchedulerError
+pub fn SchedulerBlueprint::model_identity(Self) -> @spec.ModelIdentity
+pub fn SchedulerBlueprint::model_plan_generation(Self) -> @worker_protocol.ModelPlanGeneration
+pub fn SchedulerBlueprint::new(@runtime_resolved.ResolvedRuntimeCapacity, @spec.ModelIdentity, @worker_protocol.ModelPlanGeneration, @worker_protocol.RowCapabilityRecipe, @worker_protocol.RowCapabilityRecipe, @worker_protocol.RowCapabilityRecipe) -> Self raise SchedulerError
+pub fn SchedulerBlueprint::request_slot_capacity(Self) -> Int
+pub fn SchedulerBlueprint::worker_protocol_limits(Self) -> @worker_protocol.WorkerProtocolLimits
+
+pub(all) enum SchedulerField {
+  Request
+  ModelIdentity
+  Deadline
+  Context
+  RequestCapacity
+  WaitingCapacity
+  ActiveCapacity
+  TerminalNoticeCapacity
+  OutputCapacity
+  PublicationSequence
+  RequestGeneration
+  RequestState
+  Completion
+  CancellationReservation
+  PageCapacity
+  Plan
+} derive(Eq, @debug.Debug)
+
+pub(all) enum SchedulerIssue {
+  Duplicate
+  Mismatch
+  Expired
+  Overflow
+  Exhausted
+  OutOfRange
+  Unknown
+  Stale
+  Backpressured
+  InvalidTransition
+  Unsupported
+  NoRunnableWork
+  OutOfOrder
+} derive(Eq, @debug.Debug)
+
+pub struct SchedulerPlanBufferBinding {
+  // private fields
+}
+pub fn SchedulerPlanBufferBinding::count(Self) -> Int
+pub fn SchedulerPlanBufferBinding::plan_a_identity(Self) -> @worker_protocol.PlanBufferIdentity
+pub fn SchedulerPlanBufferBinding::plan_b_identity(Self) -> @worker_protocol.PlanBufferIdentity
+
+pub struct SchedulerPublication(UInt64, @inference.RequestId, @inference.RequestGeneration, UInt64, UInt64, UInt64) derive(Eq)
+pub fn SchedulerPublication::generated_token_notice(Self) -> GeneratedTokenNotice raise SchedulerError
+pub fn SchedulerPublication::kind(Self) -> SchedulerPublicationKind
+pub fn SchedulerPublication::publication_sequence(Self) -> UInt64
+pub fn SchedulerPublication::request_generation(Self) -> @inference.RequestGeneration
+pub fn SchedulerPublication::request_id(Self) -> @inference.RequestId
+pub fn SchedulerPublication::request_slot(Self) -> SchedulerSlotId
+pub fn SchedulerPublication::route(Self) -> SchedulerPublicationRoute
+pub fn SchedulerPublication::terminal_notice(Self) -> TerminalNotice raise SchedulerError
+
+pub(all) enum SchedulerPublicationKind {
+  GeneratedTokenPublication
+  TerminalPublication
+} derive(Eq, @debug.Debug)
+
+pub struct SchedulerPublicationRoute {
+  // private fields
+} derive(Eq)
+pub fn SchedulerPublicationRoute::generation(Self) -> UInt64
+pub fn SchedulerPublicationRoute::lane(Self) -> Int
+pub fn SchedulerPublicationRoute::new(Int, UInt64) -> Self raise SchedulerError
+
+pub(all) enum SchedulerRequestState {
+  Waiting
+  RecomputeWaiting
+  Prefill
+  RecomputePrefill
+  Decode
+  Finishing
+  Cancelled
+  DeadlineExpired
+  Failed
+} derive(Eq, @debug.Debug)
+
+pub struct SchedulerSlotId(Int, Int) derive(Eq, Hash, @debug.Debug)
+pub fn SchedulerSlotId::generation(Self) -> Int
+pub fn SchedulerSlotId::index(Self) -> Int
+
+pub struct TerminalNotice(@inference.RequestId, @inference.RequestGeneration, TerminalReason, Int, UInt64) derive(Eq, @debug.Debug)
+pub fn TerminalNotice::cached_input_tokens(Self) -> Int
+pub fn TerminalNotice::publication_sequence(Self) -> UInt64
+pub fn TerminalNotice::reason(Self) -> TerminalReason
+pub fn TerminalNotice::request_generation(Self) -> @inference.RequestGeneration
+pub fn TerminalNotice::request_id(Self) -> @inference.RequestId
+
+pub(all) enum TerminalReason {
+  CancelledByCaller
+  DeadlineReached
+  StopTokenReached
+  MaximumOutputReached
+  WorkerFailed
+} derive(Eq, @debug.Debug)
+
+pub struct TokenizedRequest {
+  // private fields
+}
+pub fn TokenizedRequest::admission_deadline(Self) -> @inference.AdmissionDeadline
+pub fn TokenizedRequest::effective_limits(Self) -> @inference.EffectiveLimits
+pub fn TokenizedRequest::model_identity(Self) -> @spec.ModelIdentity
+pub fn TokenizedRequest::new(request_id~ : @inference.RequestId, model_identity~ : @spec.ModelIdentity, input_tokens~ : @inference.TokenBuffer, sampling~ : @inference.SamplingParameters, sampling_seed~ : @inference.SamplingSeed, stop_tokens~ : @inference.LunaRequestStopTokenView, stream_preference~ : @inference.StreamPreference, effective_limits~ : @inference.EffectiveLimits, admission_deadline~ : @inference.AdmissionDeadline) -> Self raise SchedulerError
+pub fn TokenizedRequest::new_with_prefix(request_id~ : @inference.RequestId, model_identity~ : @spec.ModelIdentity, input_tokens~ : @inference.TokenBuffer, sampling~ : @inference.SamplingParameters, sampling_seed~ : @inference.SamplingSeed, stop_tokens~ : @inference.LunaRequestStopTokenView, stream_preference~ : @inference.StreamPreference, effective_limits~ : @inference.EffectiveLimits, admission_deadline~ : @inference.AdmissionDeadline, tokenizer_digest~ : @tokenizer.TokenizerDigest, prefix_semantic~ : @inference.LunaRequestPrefixView) -> Self raise SchedulerError
+pub fn TokenizedRequest::request_id(Self) -> @inference.RequestId
+pub fn TokenizedRequest::sampling(Self) -> @inference.SamplingParameters
+pub fn TokenizedRequest::sampling_seed(Self) -> @inference.SamplingSeed
+pub fn TokenizedRequest::stream_preference(Self) -> @inference.StreamPreference
+
+// Type aliases
+
+// Traits

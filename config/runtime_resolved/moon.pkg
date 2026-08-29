@@ -1,0 +1,11 @@
+import {
+  "vectie/lunaflex/config/scheduler",
+  "vectie/lunaflex/config/cache",
+  "vectie/lunaflex/model/plan",
+  "vectie/lunaflex/engine/worker_protocol",
+  "vectie/lunaflex/kv/page_allocator",
+  "vectie/lunaflex/kv/block_table",
+  "vectie/lunaflex/prefix/radix",
+}
+
+supported_targets = "native"

@@ -1,0 +1,374 @@
+#define _DARWIN_C_SOURCE 1
+#define _POSIX_C_SOURCE 200809L
+#define _XOPEN_SOURCE 700
+
+#include <moonbit.h>
+
+#include <assert.h>
+#include <fcntl.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/resource.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <errno.h>
+
+static int probe_snapshot_action = 0;
+static int probe_close_eintr_once = 0;
+static int probe_close_fail_countdown = -1;
+static int probe_close(int fd) {
+  if (probe_close_eintr_once) {
+    probe_close_eintr_once = 0;
+    errno = EINTR;
+    return -1;
+  }
+  if (probe_close_fail_countdown == 0) {
+    probe_close_fail_countdown = -1;
+    int status = close(fd);
+    if (status == 0) {
+      errno = EIO;
+      return -1;
+    }
+    return status;
+  }
+  if (probe_close_fail_countdown > 0) probe_close_fail_countdown--;
+  return close(fd);
+}
+#define LF_APPROVED_FS_CLOSE probe_close
+static const char *probe_snapshot_path = NULL;
+static void probe_snapshot_hook(int stage, int fd);
+#define LF_APPROVED_FS_SNAPSHOT_HOOK(stage, fd) \
+  probe_snapshot_hook((stage), (fd))
+
+/* Compile the exact production translation unit under ASan without linking
+ * the MoonBit allocator. The tiny functions below model only the two runtime
+ * allocation layouts used by this ABI probe. */
+#include "approved_fs.c"
+
+int32_t lunaflex_approved_fs_require_absolute_identity(
+  lf_approved_handle *root,
+  moonbit_bytes_t path
+);
+
+void *moonbit_make_external_object(
+  void (*finalize)(void *self),
+  uint32_t payload_size
+) {
+  (void)finalize;
+  return calloc(1, payload_size);
+}
+
+void moonbit_incref(void *object) {
+  (void)object;
+}
+
+static void *probe_array(size_t element_size, int32_t length) {
+  size_t bytes = sizeof(struct moonbit_object) + element_size * (size_t)length;
+  struct moonbit_object *header = (struct moonbit_object *)calloc(1, bytes);
+  assert(header != NULL);
+  header->meta = (uint32_t)length;
+  return header + 1;
+}
+
+static void probe_array_free(void *value) {
+  free(Moonbit_object_header(value));
+}
+
+moonbit_bytes_t moonbit_make_bytes(int32_t size, int value) {
+  assert(size >= 0);
+  moonbit_bytes_t result = (moonbit_bytes_t)probe_array(1, size);
+  memset(result, value, (size_t)size);
+  return result;
+}
+
+static moonbit_bytes_t probe_bytes(const char *value) {
+  size_t length = strlen(value);
+  assert(length <= INT32_MAX);
+  moonbit_bytes_t result = (moonbit_bytes_t)probe_array(1, (int32_t)length);
+  memcpy(result, value, length);
+  return result;
+}
+
+static int32_t probe_fd_count(void) {
+  struct rlimit limit;
+  assert(getrlimit(RLIMIT_NOFILE, &limit) == 0);
+  rlim_t upper = limit.rlim_cur > 65536 ? 65536 : limit.rlim_cur;
+  int32_t count = 0;
+  for (int fd = 0; (rlim_t)fd < upper; fd++) {
+    errno = 0;
+    if (fcntl(fd, F_GETFD) >= 0 || errno != EBADF) count++;
+  }
+  return count;
+}
+
+static int probe_path_component_count(const char *path) {
+  int count = 0;
+  for (const char *cursor = path; *cursor != '\0'; cursor++) {
+    if (*cursor == '/') count++;
+  }
+  return count;
+}
+
+static void probe_handle_free(lf_approved_handle *handle) {
+  assert(lunaflex_approved_fs_close(handle) == LF_APPROVED_OK);
+  free(handle);
+}
+
+static void probe_worker_roots_free(lf_worker_approved_roots *roots) {
+  assert(lunaflex_approved_fs_worker_roots_close(roots) == LF_APPROVED_OK);
+  free(roots);
+}
+
+static void probe_write_exact_file(const char *path, const char *bytes) {
+  int file = open(path, O_TRUNC | O_WRONLY | O_CLOEXEC);
+  assert(file >= 0);
+  assert(write(file, bytes, 3) == 3);
+  assert(close(file) == 0);
+}
+
+static void probe_snapshot_hook(int stage, int fd) {
+  (void)fd;
+  if (stage != 1 || probe_snapshot_action == 0) return;
+  assert(probe_snapshot_path != NULL);
+  int mutator = open(probe_snapshot_path, O_WRONLY | O_CLOEXEC);
+  assert(mutator >= 0);
+  if (probe_snapshot_action == 1) {
+    assert(ftruncate(mutator, 2) == 0);
+  } else if (probe_snapshot_action == 2) {
+    assert(pwrite(mutator, "d", 1, 3) == 1);
+  } else {
+    assert(probe_snapshot_action == 3);
+    assert(pwrite(mutator, "z", 1, 0) == 1);
+    struct stat info;
+    assert(fstat(mutator, &info) == 0);
+    struct timespec times[2];
+#if defined(__APPLE__)
+    times[0] = info.st_atimespec;
+    times[1] = info.st_mtimespec;
+#else
+    times[0] = info.st_atim;
+    times[1] = info.st_mtim;
+#endif
+    times[1].tv_sec += 1;
+    assert(futimens(mutator, times) == 0);
+  }
+  assert(close(mutator) == 0);
+}
+
+int main(void) {
+  int close_probe[2];
+  assert(pipe(close_probe) == 0);
+  probe_close_eintr_once = 1;
+#if defined(__APPLE__)
+  assert(lf_close_fd(close_probe[0]) == LF_APPROVED_OK);
+#else
+  assert(lf_close_fd(close_probe[0]) == LF_APPROVED_FAILED);
+#endif
+  assert(close(close_probe[1]) == 0);
+  char root_path[] = "/tmp/lunaflux-approved-fs-asan.XXXXXX";
+  assert(mkdtemp(root_path) != NULL);
+  char canonical_root[PATH_MAX];
+  assert(realpath(root_path, canonical_root) != NULL);
+  char file_path[sizeof(root_path) + 16];
+  int written = snprintf(file_path, sizeof(file_path), "%s/file.bin", root_path);
+  assert(written > 0 && (size_t)written < sizeof(file_path));
+  int created = open(file_path, O_CREAT | O_TRUNC | O_WRONLY | O_CLOEXEC, 0600);
+  assert(created >= 0);
+  assert(write(created, "abc", 3) == 3);
+  assert(close(created) == 0);
+
+  moonbit_bytes_t root_bytes = probe_bytes(canonical_root);
+  char other_path[sizeof(root_path) + 16];
+  written = snprintf(other_path, sizeof(other_path), "%s.other", root_path);
+  assert(written > 0 && (size_t)written < sizeof(other_path));
+  assert(mkdir(other_path, 0700) == 0);
+  char canonical_other[PATH_MAX];
+  assert(realpath(other_path, canonical_other) != NULL);
+  moonbit_bytes_t other_bytes = probe_bytes(canonical_other);
+  char link_path[PATH_MAX];
+  written = snprintf(link_path, sizeof(link_path), "%s.link", canonical_root);
+  assert(written > 0 && (size_t)written < sizeof(link_path));
+  assert(symlink(canonical_root, link_path) == 0);
+  moonbit_bytes_t link_bytes = probe_bytes(link_path);
+  char missing_path[PATH_MAX];
+  written = snprintf(
+    missing_path, sizeof(missing_path), "%s.missing", canonical_root
+  );
+  assert(written > 0 && (size_t)written < sizeof(missing_path));
+  moonbit_bytes_t missing_bytes = probe_bytes(missing_path);
+  moonbit_bytes_t file_bytes = probe_bytes("file.bin");
+  moonbit_bytes_t escape_bytes = probe_bytes("../file.bin");
+  moonbit_bytes_t snapshot_failure = probe_bytes("");
+  probe_snapshot_path = file_path;
+  int32_t before = probe_fd_count();
+
+  int32_t identity_status = -1;
+  lf_approved_handle *identity_root =
+    lunaflex_approved_fs_open_root(root_bytes, &identity_status);
+  assert(identity_status == LF_APPROVED_OK);
+  assert(lunaflex_approved_fs_require_absolute_identity(
+    identity_root, root_bytes
+  ) == LF_APPROVED_OK);
+  assert(lunaflex_approved_fs_require_absolute_identity(
+    identity_root, other_bytes
+  ) == LF_APPROVED_IDENTITY_MISMATCH);
+  assert(lunaflex_approved_fs_require_absolute_identity(
+    identity_root, missing_bytes
+  ) == LF_APPROVED_UNAVAILABLE);
+  assert(lunaflex_approved_fs_require_absolute_identity(
+    identity_root, link_bytes
+  ) == LF_APPROVED_UNSUPPORTED);
+  probe_close_fail_countdown = probe_path_component_count(canonical_root);
+  assert(lunaflex_approved_fs_require_absolute_identity(
+    identity_root, root_bytes
+  ) == LF_APPROVED_FAILED);
+  assert(probe_close_fail_countdown == -1);
+  probe_close_fail_countdown = probe_path_component_count(canonical_other);
+  assert(lunaflex_approved_fs_require_absolute_identity(
+    identity_root, other_bytes
+  ) == LF_APPROVED_IDENTITY_MISMATCH);
+  assert(probe_close_fail_countdown == -1);
+  probe_close_fail_countdown = 0;
+  assert(lunaflex_approved_fs_require_absolute_identity(
+    identity_root, root_bytes
+  ) == LF_APPROVED_FAILED);
+  assert(probe_close_fail_countdown == -1);
+  probe_handle_free(identity_root);
+  assert(probe_fd_count() == before);
+
+  for (int iteration = 0; iteration < 1024; iteration++) {
+    int32_t status = -1;
+    lf_approved_handle *root = lunaflex_approved_fs_open_root(root_bytes, &status);
+    assert(status == LF_APPROVED_OK);
+    assert(lunaflex_approved_fs_require_absolute_identity(root, root_bytes) ==
+      LF_APPROVED_OK);
+    lf_approved_handle *escape =
+      lunaflex_approved_fs_open_file(root, escape_bytes, &status);
+    assert(status == LF_APPROVED_INVALID);
+    probe_handle_free(escape);
+    lf_approved_handle *file =
+      lunaflex_approved_fs_open_file(root, file_bytes, &status);
+    assert(status == LF_APPROVED_OK);
+    lf_worker_approved_roots *worker_roots =
+      lunaflex_approved_fs_acquire_worker_roots(root, root, &status);
+    assert(status == LF_APPROVED_OK);
+    assert(worker_roots->model_fd >= 5);
+    assert(worker_roots->kernel_fd >= 5);
+    assert(worker_roots->model_fd != worker_roots->kernel_fd);
+    assert(
+      lunaflex_approved_fs_test_close_worker_roots_while_active(worker_roots) ==
+      LF_APPROVED_BUSY
+    );
+    assert(lunaflex_approved_fs_worker_roots_is_closed(worker_roots) == 0);
+    lf_approved_handle *model_duplicate =
+      lunaflex_approved_fs_duplicate_worker_root(worker_roots, 0, &status);
+    assert(status == LF_APPROVED_OK);
+    lf_approved_handle *kernel_duplicate =
+      lunaflex_approved_fs_duplicate_worker_root(worker_roots, 1, &status);
+    assert(status == LF_APPROVED_OK);
+    assert(model_duplicate->fd >= 5);
+    assert(kernel_duplicate->fd >= 5);
+    assert(model_duplicate->fd != kernel_duplicate->fd);
+    lf_approved_handle *invalid_duplicate =
+      lunaflex_approved_fs_duplicate_worker_root(worker_roots, 2, &status);
+    assert(status == LF_APPROVED_INVALID);
+    probe_handle_free(invalid_duplicate);
+    lf_worker_approved_roots *prepared_roots =
+      lunaflex_approved_fs_prepare_worker_roots();
+    assert(lunaflex_approved_fs_acquire_prepared_worker_roots(
+      prepared_roots, root, root
+    ) == LF_APPROVED_OK);
+    assert(lunaflex_approved_fs_acquire_prepared_worker_roots(
+      prepared_roots, root, root
+    ) == LF_APPROVED_BUSY);
+    assert(lunaflex_approved_fs_worker_roots_close(prepared_roots) ==
+      LF_APPROVED_OK);
+    assert(lunaflex_approved_fs_acquire_prepared_worker_roots(
+      prepared_roots, root, root
+    ) == LF_APPROVED_BUSY);
+    assert(lunaflex_approved_fs_acquire_prepared_worker_roots(
+      NULL, root, root
+    ) == LF_APPROVED_FAILED);
+
+    uint8_t *destination = (uint8_t *)probe_array(1, 5);
+    memset(destination, '!', 5);
+    assert(lunaflex_approved_fs_read_exact_at(file, destination, 1, 3, 0) == 0);
+    assert(destination[0] == '!' && destination[1] == 'a');
+    assert(destination[2] == 'b' && destination[3] == 'c');
+    assert(destination[4] == '!');
+    assert(lunaflex_approved_fs_read_exact_at(file, destination, 4, 2, 0) == 1);
+
+    int64_t *stamp = (int64_t *)probe_array(sizeof(int64_t), 5);
+    assert(lunaflex_approved_fs_stamp(file, stamp) == 0);
+    assert(stamp[0] == 3);
+
+    int32_t snapshot_status = -1;
+    moonbit_bytes_t snapshot = lunaflex_approved_fs_read_immutable_snapshot(
+      file, 3, snapshot_failure, &snapshot_status
+    );
+    assert(snapshot_status == LF_APPROVED_OK);
+    assert(Moonbit_array_length(snapshot) == 3);
+    assert(memcmp(snapshot, "abc", 3) == 0);
+    probe_array_free(snapshot);
+
+    snapshot = lunaflex_approved_fs_read_immutable_snapshot(
+      file, 2, snapshot_failure, &snapshot_status
+    );
+    assert(snapshot_status == LF_APPROVED_TOO_LARGE);
+    assert(snapshot == snapshot_failure);
+
+    probe_snapshot_action = 1;
+    snapshot = lunaflex_approved_fs_read_immutable_snapshot(
+      file, 3, snapshot_failure, &snapshot_status
+    );
+    probe_snapshot_action = 0;
+    assert(snapshot_status == LF_APPROVED_TRUNCATED);
+    probe_array_free(snapshot);
+    probe_write_exact_file(file_path, "abc");
+
+    probe_snapshot_action = 2;
+    snapshot = lunaflex_approved_fs_read_immutable_snapshot(
+      file, 4, snapshot_failure, &snapshot_status
+    );
+    probe_snapshot_action = 0;
+    assert(snapshot_status == LF_APPROVED_CHANGED);
+    probe_array_free(snapshot);
+    probe_write_exact_file(file_path, "abc");
+
+    probe_snapshot_action = 3;
+    snapshot = lunaflex_approved_fs_read_immutable_snapshot(
+      file, 3, snapshot_failure, &snapshot_status
+    );
+    probe_snapshot_action = 0;
+    assert(snapshot_status == LF_APPROVED_CHANGED);
+    probe_array_free(snapshot);
+    probe_write_exact_file(file_path, "abc");
+
+    assert(lunaflex_approved_fs_test_close_while_active(file, 2) == 7);
+    assert(lunaflex_approved_fs_is_closed(file) == 0);
+
+    probe_array_free(destination);
+    probe_array_free(stamp);
+    probe_handle_free(file);
+    probe_handle_free(model_duplicate);
+    probe_handle_free(kernel_duplicate);
+    probe_worker_roots_free(worker_roots);
+    probe_handle_free(root);
+  }
+
+  assert(probe_fd_count() == before);
+  probe_array_free(root_bytes);
+  probe_array_free(other_bytes);
+  probe_array_free(link_bytes);
+  probe_array_free(missing_bytes);
+  probe_array_free(file_bytes);
+  probe_array_free(escape_bytes);
+  probe_array_free(snapshot_failure);
+  assert(unlink(file_path) == 0);
+  assert(rmdir(root_path) == 0);
+  assert(rmdir(other_path) == 0);
+  assert(unlink(link_path) == 0);
+  return 0;
+}

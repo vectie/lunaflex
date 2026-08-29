@@ -1,0 +1,17 @@
+import {
+  "vectie/lunaflex/device",
+  "vectie/lunaflex/engine/device_plan",
+  "vectie/lunaflex/kernels/catalog",
+  "vectie/lunaflex/model/plan",
+  "vectie/lunaflex/model/spec",
+}
+
+import {
+  "vectie/lunaflex/model/device_materialize",
+  "vectie/lunaflex/model/llama",
+  "vectie/lunaflex/model/llama_weights",
+  "vectie/lunaflex/model/plan_test_fixture",
+  "vectie/lunaflex/model/safetensors",
+} for "test"
+
+supported_targets = "native"

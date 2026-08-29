@@ -1,0 +1,19 @@
+import {
+  "moonbitlang/core/encoding/utf8",
+  "vectie/lunaflex/device",
+  "vectie/lunaflex/engine/device_memory",
+  "vectie/lunaflex/engine/device_plan",
+  "vectie/lunaflex/engine/device_profile",
+  "vectie/lunaflex/kernels/artifact",
+  "vectie/lunaflex/kernels/catalog",
+  "vectie/lunaflex/kernels/launch_contract",
+  "vectie/lunaflex/model/device_materialize",
+  "vectie/lunaflex/model/plan",
+  "vectie/lunaflex/model/spec",
+}
+
+import {
+  "vectie/lunaflex/model/plan_test_fixture",
+} for "wbtest"
+
+supported_targets = "native"

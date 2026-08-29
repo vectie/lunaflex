@@ -1,0 +1,15 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/lunaflex/runtime/approved_fs_inheritance"
+
+// Values
+
+// Errors
+
+// Types and methods
+pub type WorkerApprovedRootSpawnAuthority
+
+pub type WorkerApprovedRoots
+
+// Type aliases
+
+// Traits

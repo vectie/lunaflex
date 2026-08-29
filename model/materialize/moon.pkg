@@ -1,0 +1,13 @@
+import {
+  "vectie/lunaflex/model/llama_weights",
+  "vectie/lunaflex/model/plan",
+  "vectie/lunaflex/model/safetensors",
+  "vectie/lunaflex/model/spec",
+  "moonbitlang/x/crypto",
+}
+
+import {
+  "vectie/lunaflex/model/llama",
+} for "test"
+
+supported_targets = "native"

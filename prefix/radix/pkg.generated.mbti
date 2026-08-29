@@ -1,0 +1,232 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/lunaflex/prefix/radix"
+
+import {
+  "moonbitlang/core/debug",
+  "vectie/lunaflex/contracts/inference",
+  "vectie/lunaflex/kv/page_allocator",
+  "vectie/lunaflex/model/spec",
+  "vectie/lunaflex/tokenizer",
+}
+
+// Values
+
+// Errors
+pub(all) suberror PrefixIndexError {
+  InvalidLimit(PrefixLimitRule)
+  InvalidTokenCount
+  InvalidToken(Int)
+  StaleKey
+  CachePermissionDenied
+  InvalidPageCount
+  ResultBufferTooSmall
+  ResultIndexOutOfBounds
+  Exhausted
+  DuplicatePrefix(PrefixEntryId)
+  PublishPlanBusy
+  StalePublishPlan
+  PublishPlanInvalidated
+  EvictionPlanBusy
+  StaleEvictionPlan
+  EvictionPlanInvalidated
+  StaleEntry(PrefixEntryId)
+  ReferenceOverflow(PrefixEntryId)
+  ReferenceUnderflow(PrefixEntryId)
+  InvariantViolation(PrefixInvariantRule)
+} derive(Eq, @debug.Debug)
+
+// Types and methods
+pub struct PrefixEntryId(Int, Int) derive(Eq, Hash, @debug.Debug)
+pub fn PrefixEntryId::generation(Self) -> Int
+pub fn PrefixEntryId::index(Self) -> Int
+pub fn PrefixEntryId::new(index~ : Int, generation~ : Int) -> Self raise PrefixIndexError
+
+pub struct PrefixEntrySnapshot {
+  id : PrefixEntryId
+  token_count : Int
+  page_count : Int
+  active_references : Int
+  recency : UInt64
+} derive(Eq, @debug.Debug)
+pub fn PrefixEntrySnapshot::active_reference_count(Self) -> Int
+pub fn PrefixEntrySnapshot::id(Self) -> PrefixEntryId
+pub fn PrefixEntrySnapshot::page_count(Self) -> Int
+pub fn PrefixEntrySnapshot::recency(Self) -> UInt64
+pub fn PrefixEntrySnapshot::token_count(Self) -> Int
+
+pub struct PrefixEvictionBuffer {
+  // private fields
+}
+pub fn PrefixEvictionBuffer::capacity(Self) -> Int
+pub fn PrefixEvictionBuffer::clear(Self) -> Unit
+pub fn PrefixEvictionBuffer::entry(Self) -> PrefixEntryId?
+pub fn PrefixEvictionBuffer::new(Int) -> Self raise PrefixIndexError
+pub fn PrefixEvictionBuffer::page_at(Self, Int) -> @page_allocator.PageId raise PrefixIndexError
+pub fn PrefixEvictionBuffer::page_count(Self) -> Int
+
+pub struct PrefixEvictionPlan {
+  // private fields
+}
+
+pub struct PrefixEvictionStart {
+  // private fields
+}
+pub fn PrefixEvictionStart::is_absent(Self) -> Bool
+pub fn PrefixEvictionStart::is_planned(Self) -> Bool
+pub fn PrefixEvictionStart::is_rejected(Self) -> Bool
+pub fn PrefixEvictionStart::plan(Self) -> PrefixEvictionPlan raise PrefixIndexError
+
+pub struct PrefixIndex {
+  // private fields
+}
+pub fn PrefixIndex::abort_eviction(Self, PrefixEvictionPlan) -> Unit raise PrefixIndexError
+pub fn PrefixIndex::abort_publish(Self, PrefixPublishPlan) -> Unit raise PrefixIndexError
+pub fn PrefixIndex::active_reference_count(Self, PrefixEntryId) -> Int raise PrefixIndexError
+pub fn PrefixIndex::commit_eviction(Self, PrefixEvictionPlan, PrefixEvictionBuffer) -> PrefixEntryId raise PrefixIndexError
+pub fn PrefixIndex::debug_check_invariants(Self) -> Unit raise PrefixIndexError
+pub fn PrefixIndex::debug_snapshot(Self) -> PrefixIndexSnapshot
+pub fn PrefixIndex::entry_count(Self) -> Int
+pub fn PrefixIndex::limits(Self) -> PrefixIndexLimits
+pub fn PrefixIndex::lookup(Self, PrefixRequestKey, PrefixTokenBuffer, maximum_reusable_tokens~ : Int, PrefixLookupBuffer) -> Unit raise PrefixIndexError
+pub fn PrefixIndex::new(PrefixIndexLimits) -> Self raise PrefixIndexError
+pub fn PrefixIndex::node_count(Self) -> Int
+pub fn PrefixIndex::page_count(Self) -> Int
+pub fn PrefixIndex::publish(Self, PrefixPublishPlan, PrefixTokenBuffer, PrefixPublishBuffer, priority~ : Int) -> PrefixEntryId raise PrefixIndexError
+pub fn PrefixIndex::release_active(Self, PrefixEntryId) -> Unit raise PrefixIndexError
+pub fn PrefixIndex::required_bool_cells(PrefixIndexLimits) -> UInt64 raise PrefixIndexError
+pub fn PrefixIndex::required_byte_cells(PrefixIndexLimits) -> UInt64 raise PrefixIndexError
+pub fn PrefixIndex::required_int_cells(PrefixIndexLimits) -> UInt64 raise PrefixIndexError
+pub fn PrefixIndex::required_reference_cells(PrefixIndexLimits) -> UInt64 raise PrefixIndexError
+pub fn PrefixIndex::retain_active(Self, PrefixEntryId) -> Unit raise PrefixIndexError
+pub fn PrefixIndex::retired_entry_count(Self) -> Int
+pub fn PrefixIndex::token_cell_count(Self) -> Int
+pub fn PrefixIndex::touch(Self, PrefixEntryId) -> Unit raise PrefixIndexError
+pub fn PrefixIndex::try_plan_eviction(Self, PrefixEvictionBuffer) -> PrefixEvictionStart raise PrefixIndexError
+pub fn PrefixIndex::try_plan_publish(Self, PrefixRequestKey, PrefixTokenBuffer, PrefixPublishBuffer, priority~ : Int) -> PrefixPublishStart raise PrefixIndexError
+
+pub struct PrefixIndexLimits {
+  entry_capacity : Int
+  node_capacity : Int
+  token_capacity : Int
+  max_tokens_per_entry : Int
+  page_capacity : Int
+  max_scope_bytes : Int
+  max_active_references_per_entry : Int
+  max_generation : Int
+} derive(Eq, @debug.Debug)
+pub fn PrefixIndexLimits::entry_capacity(Self) -> Int
+pub fn PrefixIndexLimits::max_active_references_per_entry(Self) -> Int
+pub fn PrefixIndexLimits::max_generation(Self) -> Int
+pub fn PrefixIndexLimits::max_scope_bytes(Self) -> Int
+pub fn PrefixIndexLimits::max_tokens_per_entry(Self) -> Int
+pub fn PrefixIndexLimits::new(entry_capacity~ : Int, node_capacity~ : Int, max_tokens_per_entry~ : Int, page_capacity~ : Int, max_active_references_per_entry~ : Int, token_capacity? : Int, max_scope_bytes? : Int, max_generation? : Int) -> Self raise PrefixIndexError
+pub fn PrefixIndexLimits::node_capacity(Self) -> Int
+pub fn PrefixIndexLimits::page_capacity(Self) -> Int
+pub fn PrefixIndexLimits::token_capacity(Self) -> Int
+
+pub struct PrefixIndexSnapshot {
+  entry_count : Int
+  retired_entry_count : Int
+  node_count : Int
+  page_count : Int
+  entries : ReadOnlyArray[PrefixEntrySnapshot]
+} derive(Eq, @debug.Debug)
+pub fn PrefixIndexSnapshot::entry_at(Self, Int) -> PrefixEntrySnapshot raise PrefixIndexError
+pub fn PrefixIndexSnapshot::entry_count(Self) -> Int
+pub fn PrefixIndexSnapshot::node_count(Self) -> Int
+pub fn PrefixIndexSnapshot::page_count(Self) -> Int
+pub fn PrefixIndexSnapshot::retired_entry_count(Self) -> Int
+pub fn PrefixIndexSnapshot::snapshot_count(Self) -> Int
+
+pub(all) enum PrefixInvariantRule {
+  CountPartition
+  RootCount
+  NodeOwnership
+  NodeUsage
+  TerminalLink
+  PageChain
+  CompressedShape
+  EntryShape
+  GenerationRange
+} derive(Eq, @debug.Debug)
+
+pub struct PrefixLayout {
+  version : Int
+  tokens_per_page : Int
+} derive(Eq, @debug.Debug)
+pub fn PrefixLayout::new(version~ : Int, tokens_per_page~ : Int) -> Self raise PrefixIndexError
+pub fn PrefixLayout::tokens_per_page(Self) -> Int
+pub fn PrefixLayout::version(Self) -> Int
+
+pub(all) enum PrefixLimitRule {
+  EntryCapacity
+  NodeCapacity
+  TokenCapacity
+  TokensPerEntry
+  PageCapacity
+  ScopeBytes
+  Priority
+  TokensPerPage
+  ActiveReferences
+  Generation
+  LayoutVersion
+} derive(Eq, @debug.Debug)
+
+pub struct PrefixLookupBuffer {
+  // private fields
+}
+pub fn PrefixLookupBuffer::capacity(Self) -> Int
+pub fn PrefixLookupBuffer::clear(Self) -> Unit
+pub fn PrefixLookupBuffer::entry(Self) -> PrefixEntryId?
+pub fn PrefixLookupBuffer::entry_id(Self) -> PrefixEntryId raise PrefixIndexError
+pub fn PrefixLookupBuffer::has_entry(Self) -> Bool
+pub fn PrefixLookupBuffer::matched_tokens(Self) -> Int
+pub fn PrefixLookupBuffer::new(Int) -> Self raise PrefixIndexError
+pub fn PrefixLookupBuffer::page_at(Self, Int) -> @page_allocator.PageId raise PrefixIndexError
+pub fn PrefixLookupBuffer::page_count(Self) -> Int
+
+pub struct PrefixPublishBuffer {
+  // private fields
+}
+pub fn PrefixPublishBuffer::capacity(Self) -> Int
+pub fn PrefixPublishBuffer::clear(Self) -> Unit
+pub fn PrefixPublishBuffer::length(Self) -> Int
+pub fn PrefixPublishBuffer::new(Int) -> Self raise PrefixIndexError
+pub fn PrefixPublishBuffer::page_at(Self, Int) -> @page_allocator.PageId raise PrefixIndexError
+pub fn PrefixPublishBuffer::planned_adoption(Self, Int) -> Bool raise PrefixIndexError
+pub fn PrefixPublishBuffer::push_page(Self, @page_allocator.PageId) -> Unit raise PrefixIndexError
+pub fn PrefixPublishBuffer::was_adopted(Self, Int) -> Bool raise PrefixIndexError
+
+pub struct PrefixPublishPlan {
+  // private fields
+}
+
+pub struct PrefixPublishStart {
+  // private fields
+}
+pub fn PrefixPublishStart::duplicate_entry(Self) -> PrefixEntryId raise PrefixIndexError
+pub fn PrefixPublishStart::is_capacity_exhausted(Self) -> Bool
+pub fn PrefixPublishStart::is_duplicate(Self) -> Bool
+pub fn PrefixPublishStart::is_planned(Self) -> Bool
+pub fn PrefixPublishStart::is_rejected(Self) -> Bool
+pub fn PrefixPublishStart::plan(Self) -> PrefixPublishPlan raise PrefixIndexError
+
+pub struct PrefixRequestKey {
+  // private fields
+}
+pub fn PrefixRequestKey::cache_permission(Self) -> @inference.CachePermission raise PrefixIndexError
+pub fn PrefixRequestKey::is_live(Self) -> Bool
+pub fn PrefixRequestKey::new(model_identity~ : @spec.ModelIdentity, tokenizer~ : @tokenizer.TokenizerDigest, layout~ : PrefixLayout, semantic~ : @inference.LunaRequestPrefixView) -> Self raise PrefixIndexError
+
+pub struct PrefixTokenBuffer {
+  // private fields
+}
+pub fn PrefixTokenBuffer::capacity(Self) -> Int
+pub fn PrefixTokenBuffer::clear(Self) -> Unit
+pub fn PrefixTokenBuffer::length(Self) -> Int
+pub fn PrefixTokenBuffer::new(Int) -> Self raise PrefixIndexError
+pub fn PrefixTokenBuffer::push_token(Self, Int) -> Unit raise PrefixIndexError
+
+// Type aliases
+
+// Traits

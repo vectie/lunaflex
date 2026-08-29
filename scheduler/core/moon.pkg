@@ -1,0 +1,24 @@
+import {
+  "vectie/lunaflex/config/runtime_resolved",
+  "vectie/lunaflex/contracts/inference",
+  "vectie/lunaflex/engine/worker_protocol",
+  "vectie/lunaflex/kv/block_table",
+  "vectie/lunaflex/kv/page_allocator",
+  "vectie/lunaflex/model/spec",
+  "vectie/lunaflex/tokenizer",
+  "vectie/lunaflex/prefix/radix",
+}
+
+supported_targets = "native"
+
+import {
+  "vectie/lunaflex/config/cache",
+  "vectie/lunaflex/config/scheduler",
+  "vectie/lunaflex/model/plan",
+} for "test"
+
+import {
+  "vectie/lunaflex/config/cache",
+  "vectie/lunaflex/config/scheduler",
+  "vectie/lunaflex/model/plan",
+} for "wbtest"

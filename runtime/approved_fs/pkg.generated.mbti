@@ -1,0 +1,112 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/lunaflex/runtime/approved_fs"
+
+import {
+  "moonbitlang/core/debug",
+  "vectie/lunaflex/runtime/approved_fs_inheritance",
+}
+
+// Values
+pub fn acquire_prepared_worker_approved_roots(PreparedWorkerApprovedRoots, ApprovedRoot, ApprovedRoot) -> Unit raise ApprovedFsError
+
+pub fn acquire_prepared_worker_approved_roots_status(PreparedWorkerApprovedRoots, ApprovedRoot, ApprovedRoot) -> Int
+
+pub fn acquire_worker_approved_roots(model_root~ : ApprovedRoot, kernel_root~ : ApprovedRoot) -> @approved_fs_inheritance.WorkerApprovedRoots raise ApprovedFsError
+
+pub fn close_worker_approved_roots(@approved_fs_inheritance.WorkerApprovedRoots) -> Unit raise ApprovedFsError
+
+pub fn duplicate_worker_approved_root(@approved_fs_inheritance.WorkerApprovedRoots, ApprovedRootRole) -> ApprovedRoot raise ApprovedFsError
+
+pub fn prepare_worker_approved_roots() -> PreparedWorkerApprovedRoots
+
+pub fn worker_approved_root_spawn_authority(@approved_fs_inheritance.WorkerApprovedRoots) -> @approved_fs_inheritance.WorkerApprovedRootSpawnAuthority
+
+pub fn worker_approved_roots_close_status(@approved_fs_inheritance.WorkerApprovedRoots) -> Int
+
+pub fn worker_approved_roots_is_closed(@approved_fs_inheritance.WorkerApprovedRoots) -> Bool
+
+// Errors
+pub(all) suberror ApprovedFsError {
+  Invalid(ApprovedFsRule)
+  Unavailable(ApprovedFsObject)
+  UnsupportedType(ApprovedFsObject)
+  FileTooLarge
+  ChangedDuringRead
+  Truncated
+  Busy(ApprovedFsOperation)
+  OperationFailed(ApprovedFsOperation)
+} derive(Eq, @debug.Debug)
+
+// Types and methods
+pub struct ApprovedFile {
+  // private fields
+}
+pub fn ApprovedFile::close(Self) -> Unit raise ApprovedFsError
+pub fn ApprovedFile::is_closed(Self) -> Bool
+pub fn ApprovedFile::read_exactly_at(Self, FixedArray[Byte], destination_offset~ : Int, byte_count~ : Int, position~ : Int64) -> Unit raise ApprovedFsError
+pub fn ApprovedFile::read_immutable_snapshot(Self, maximum_bytes~ : Int64) -> Bytes raise ApprovedFsError
+pub fn ApprovedFile::stamp(Self) -> ApprovedFileStamp raise ApprovedFsError
+
+pub struct ApprovedFileStamp {
+  // private fields
+} derive(Eq)
+pub fn ApprovedFileStamp::byte_count(Self) -> Int64
+
+pub(all) enum ApprovedFsObject {
+  Root
+  File
+} derive(Eq, @debug.Debug)
+
+pub(all) enum ApprovedFsOperation {
+  Open
+  Read
+  Stat
+  Close
+} derive(Eq, @debug.Debug)
+
+pub(all) enum ApprovedFsRule {
+  RootPath
+  RootIdentity
+  RelativeLocator
+  ReadRange
+  Lifecycle
+} derive(Eq, @debug.Debug)
+
+pub struct ApprovedRelativeLocator {
+  // private fields
+}
+pub fn ApprovedRelativeLocator::new(StringView) -> Self raise ApprovedFsError
+
+pub struct ApprovedRoot {
+  // private fields
+}
+pub fn ApprovedRoot::close(Self) -> Unit raise ApprovedFsError
+pub fn ApprovedRoot::is_closed(Self) -> Bool
+pub fn ApprovedRoot::materialization_view(Self, StringView, StringView) -> ApprovedRootMaterializationView raise ApprovedFsError
+pub fn ApprovedRoot::open_absolute(StringView) -> Self raise ApprovedFsError
+pub fn ApprovedRoot::open_file(Self, ApprovedRelativeLocator) -> ApprovedFile raise ApprovedFsError
+pub fn ApprovedRoot::open_inherited(ApprovedRootRole) -> Self raise ApprovedFsError
+pub fn ApprovedRoot::require_absolute_identity(Self, StringView) -> Unit raise ApprovedFsError
+
+pub struct ApprovedRootMaterializationView {
+  // private fields
+}
+pub fn ApprovedRootMaterializationView::source_root(Self) -> ApprovedRoot
+pub fn ApprovedRootMaterializationView::target_label(Self) -> String
+
+pub(all) enum ApprovedRootRole {
+  Model
+  Kernel
+} derive(Eq, @debug.Debug)
+
+pub struct PreparedWorkerApprovedRoots {
+  // private fields
+}
+pub fn PreparedWorkerApprovedRoots::root_owner(Self) -> @approved_fs_inheritance.WorkerApprovedRoots
+
+// Type aliases
+pub using @approved_fs_inheritance {type WorkerApprovedRootSpawnAuthority}
+
+pub using @approved_fs_inheritance {type WorkerApprovedRoots}
+
+// Traits

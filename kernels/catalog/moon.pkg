@@ -1,0 +1,13 @@
+import {
+  "vectie/lunaflex/device",
+  "vectie/lunaflex/kv/device_layout",
+  "vectie/lunaflex/model/numeric_contract",
+  "vectie/lunaflex/model/plan",
+  "vectie/lunaflex/model/spec",
+}
+
+supported_targets = "native"
+
+import {
+  "vectie/lunaflex/model/plan_test_fixture",
+} for "test"

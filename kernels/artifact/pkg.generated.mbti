@@ -1,0 +1,109 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/lunaflex/kernels/artifact"
+
+import {
+  "moonbitlang/core/debug",
+  "vectie/lunaflex/kernels/catalog",
+  "vectie/lunaflex/kernels/launch_contract",
+  "vectie/lunaflex/model/spec",
+}
+
+// Values
+pub fn admit(@launch_contract.LaunchContractSet, ArrayView[KernelModuleInput], ArrayView[KernelEntryPointInput], KernelArtifactLimits) -> KernelArtifactBundle raise KernelArtifactError
+
+pub fn admit_paged_kv(@launch_contract.PagedKvLaunchContractSet, ArrayView[KernelModuleInput], ArrayView[KernelEntryPointInput], KernelArtifactLimits) -> KernelArtifactBundle raise KernelArtifactError
+
+pub fn admit_paged_v4(@launch_contract.PagedV4LaunchContractSet, ArrayView[KernelModuleInput], ArrayView[KernelEntryPointInput], KernelArtifactLimits) -> KernelArtifactBundle raise KernelArtifactError
+
+pub fn validate_entry_point_symbols(ArrayView[KernelEntryPointInput], KernelArtifactLimits) -> Unit raise KernelArtifactError
+
+// Errors
+pub(all) suberror KernelArtifactError {
+  CatalogVersionMismatch(expected~ : @catalog.CatalogVersion, actual~ : @catalog.CatalogVersion)
+  InvalidLimit(KernelArtifactLimit)
+  ModuleCountExceeded(maximum~ : Int)
+  EntryPointCountExceeded(maximum~ : Int)
+  ContractCountExceeded(maximum~ : Int)
+  EmptyModule(@catalog.AotArtifactDigest)
+  ModuleTooLarge(digest~ : @catalog.AotArtifactDigest, maximum~ : Int64)
+  TotalModuleBytesExceeded(maximum~ : Int64)
+  InvalidFunctionSymbol(entry_point~ : @catalog.AotKernelEntryPoint, rule~ : FunctionSymbolRule)
+  DigestMismatch(@catalog.AotArtifactDigest)
+  DuplicateModule(@catalog.AotArtifactDigest)
+  MissingModule(@catalog.AotArtifactDigest)
+  UnreferencedModule(@catalog.AotArtifactDigest)
+  DuplicateEntryPoint(@catalog.AotKernelEntryPoint)
+  MissingEntryPoint(@catalog.AotKernelEntryPoint)
+  UnreferencedEntryPoint(@catalog.AotKernelEntryPoint)
+} derive(Eq, @debug.Debug)
+
+// Types and methods
+pub(all) enum FunctionSymbolRule {
+  Empty
+  TooLong
+  NonAscii
+  InvalidInitial
+  InvalidContinuation
+} derive(Eq, @debug.Debug)
+
+pub struct KernelArtifactBundle {
+  // private fields
+}
+pub fn KernelArtifactBundle::catalog_version(Self) -> @catalog.CatalogVersion
+pub fn KernelArtifactBundle::device_target(Self) -> @catalog.DeviceTarget
+pub fn KernelArtifactBundle::entry_point(Self, @catalog.AotKernelEntryPoint) -> KernelEntryPoint?
+pub fn KernelArtifactBundle::entry_point_count(Self) -> Int
+pub fn KernelArtifactBundle::entry_points(Self) -> ReadOnlyArray[KernelEntryPoint]
+pub fn KernelArtifactBundle::find_module(Self, @catalog.AotArtifactDigest) -> KernelModule?
+pub fn KernelArtifactBundle::model_identity(Self) -> @spec.ModelIdentity
+pub fn KernelArtifactBundle::module_count(Self) -> Int
+pub fn KernelArtifactBundle::modules(Self) -> ReadOnlyArray[KernelModule]
+pub fn KernelArtifactBundle::total_module_bytes(Self) -> Int64
+
+pub(all) enum KernelArtifactLimit {
+  ModuleCount
+  EntryPointCount
+  ModuleBytes
+  TotalModuleBytes
+  FunctionSymbolBytes
+} derive(Eq, @debug.Debug)
+
+pub struct KernelArtifactLimits {
+  // private fields
+}
+pub fn KernelArtifactLimits::max_entry_points(Self) -> Int
+pub fn KernelArtifactLimits::max_function_symbol_bytes(Self) -> Int
+pub fn KernelArtifactLimits::max_module_bytes(Self) -> Int64
+pub fn KernelArtifactLimits::max_modules(Self) -> Int
+pub fn KernelArtifactLimits::max_total_module_bytes(Self) -> Int64
+pub fn KernelArtifactLimits::new(max_modules~ : Int, max_entry_points~ : Int, max_module_bytes~ : Int64, max_total_module_bytes~ : Int64, max_function_symbol_bytes~ : Int) -> Self raise KernelArtifactError
+
+pub struct KernelEntryPoint {
+  // private fields
+}
+pub fn KernelEntryPoint::function_symbol(Self) -> String
+pub fn KernelEntryPoint::identity(Self) -> @catalog.AotKernelEntryPoint
+pub fn KernelEntryPoint::module_index(Self) -> Int
+
+pub struct KernelEntryPointInput {
+  // private fields
+}
+pub fn KernelEntryPointInput::function_symbol(Self) -> String
+pub fn KernelEntryPointInput::identity(Self) -> @catalog.AotKernelEntryPoint
+pub fn KernelEntryPointInput::new(entry_point~ : @catalog.AotKernelEntryPoint, function_symbol~ : String) -> Self
+
+pub struct KernelModule {
+  // private fields
+}
+pub fn KernelModule::digest(Self) -> @catalog.AotArtifactDigest
+pub fn KernelModule::module_bytes(Self) -> Bytes
+
+pub struct KernelModuleInput {
+  // private fields
+}
+pub fn KernelModuleInput::from_bytes(digest~ : @catalog.AotArtifactDigest, module_bytes~ : Bytes) -> Self
+pub fn KernelModuleInput::new(digest~ : @catalog.AotArtifactDigest, module_bytes~ : FixedArray[Byte]) -> Self
+
+// Type aliases
+
+// Traits

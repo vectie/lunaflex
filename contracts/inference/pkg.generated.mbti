@@ -1,0 +1,505 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/lunaflex/contracts/inference"
+
+import {
+  "moonbitlang/core/debug",
+  "vectie/lunaflex/model/spec",
+}
+
+// Values
+
+// Errors
+pub(all) suberror InferenceContractError {
+  Invalid(field~ : ContractField, issue~ : ContractIssue, index~ : Int)
+} derive(Eq, @debug.Debug)
+
+// Types and methods
+pub struct AcceptedEvent {
+  model_identity : @spec.ModelIdentity
+  effective_limits : EffectiveLimits
+} derive(Eq, @debug.Debug)
+pub fn AcceptedEvent::effective_limits(Self) -> EffectiveLimits
+pub fn AcceptedEvent::model_identity(Self) -> @spec.ModelIdentity
+pub fn AcceptedEvent::new(model_identity~ : @spec.ModelIdentity, effective_limits~ : EffectiveLimits) -> Self
+
+pub struct AdmissionDeadline {
+  // private fields
+} derive(Eq, @debug.Debug)
+pub fn AdmissionDeadline::at_millis(Self) -> UInt64
+pub fn AdmissionDeadline::from_receipt(UInt64, DeadlineBudget) -> Self raise InferenceContractError
+pub fn AdmissionDeadline::is_expired(Self, UInt64) -> Bool
+
+pub(all) enum CachePermission {
+  Disabled
+  ReadOnly
+  ReadWrite
+} derive(Eq, @debug.Debug)
+
+pub struct CachePolicy {
+  // private fields
+}
+pub fn CachePolicy::new(CacheScope, CachePermission) -> Self
+pub fn CachePolicy::permission(Self) -> CachePermission
+pub fn CachePolicy::scope(Self) -> CacheScope
+
+pub struct CacheScope {
+  // private fields
+}
+pub fn CacheScope::as_string(Self) -> String
+pub fn CacheScope::from_ascii(BytesView, InferenceLimits) -> Self raise InferenceContractError
+
+pub struct CompletedEvent {
+  finish_reason : FinishReason
+  final_usage : Usage
+  final_delta : DecodedDelta?
+} derive(Eq)
+pub fn CompletedEvent::final_delta(Self) -> DecodedDelta?
+pub fn CompletedEvent::final_usage(Self) -> Usage
+pub fn CompletedEvent::finish_reason(Self) -> FinishReason
+pub fn CompletedEvent::new(finish_reason~ : FinishReason, final_usage~ : Usage) -> Self
+pub fn CompletedEvent::with_final_delta(finish_reason~ : FinishReason, final_usage~ : Usage, final_delta~ : DecodedDelta, InferenceLimits) -> Self raise InferenceContractError
+
+pub(all) enum ContractField {
+  ProtocolVersion
+  RequestId
+  RequestGeneration
+  Limit
+  InputToken
+  InputText
+  LunaTokenStorage
+  LunaRequestSemantic
+  MaximumNewTokens
+  ContextCeiling
+  Temperature
+  TopK
+  TopP
+  SamplingSeed
+  StopToken
+  StopString
+  DeadlineBudget
+  CacheScope
+  TraceCorrelation
+  DecodedDelta
+  TokenPosition
+  UsageInput
+  UsageCachedInput
+  UsageOutput
+  PublicErrorCode
+} derive(Eq, @debug.Debug)
+
+pub(all) enum ContractIssue {
+  Empty
+  TooLong
+  TooMany
+  InvalidFormat
+  OutOfRange
+  Duplicate
+  NonFinite
+  NotMonotonic
+  Inconsistent
+  Unsupported
+  LunaStorageBusy
+  LunaStorageStale
+  LunaStorageLifecycle
+} derive(Eq, @debug.Debug)
+
+pub struct DeadlineBudget {
+  // private fields
+} derive(Eq, @debug.Debug)
+pub fn DeadlineBudget::from_milliseconds(UInt64, InferenceLimits) -> Self raise InferenceContractError
+pub fn DeadlineBudget::milliseconds(Self) -> UInt64
+
+pub struct DecodedDelta {
+  text : String
+  utf8_bytes : Int
+} derive(Eq)
+pub fn DecodedDelta::from_utf8(BytesView, InferenceLimits) -> Self raise InferenceContractError
+pub fn DecodedDelta::text(Self) -> String
+pub fn DecodedDelta::utf8_bytes(Self) -> Int
+
+pub struct EffectiveLimits {
+  // private fields
+} derive(Eq, @debug.Debug)
+pub fn EffectiveLimits::context_ceiling(Self) -> Int
+pub fn EffectiveLimits::max_new_tokens(Self) -> Int
+pub fn EffectiveLimits::new(max_new_tokens~ : Int, context_ceiling~ : Int, InferenceLimits) -> Self raise InferenceContractError
+
+pub struct FailedEvent {
+  code : PublicErrorCode
+  retryable : Bool
+}
+pub fn FailedEvent::code(Self) -> PublicErrorCode
+pub fn FailedEvent::new(code~ : PublicErrorCode, retryable~ : Bool) -> Self
+pub fn FailedEvent::retryable(Self) -> Bool
+
+pub(all) enum FinishReason {
+  StopSequence
+  TokenLimit
+  Cancelled
+} derive(Eq, @debug.Debug)
+
+pub struct GenerateRequest {
+  // private fields
+}
+pub fn GenerateRequest::cache(Self) -> CachePolicy
+pub fn GenerateRequest::context_ceiling(Self) -> Int
+pub fn GenerateRequest::deadline(Self) -> DeadlineBudget
+pub fn GenerateRequest::input(Self) -> Input
+pub fn GenerateRequest::max_new_tokens(Self) -> Int
+pub fn GenerateRequest::model_identity(Self) -> @spec.ModelIdentity
+pub fn GenerateRequest::new(protocol_version~ : ProtocolVersion, request_id~ : RequestId, model_identity~ : @spec.ModelIdentity, input~ : Input, max_new_tokens~ : Int, context_ceiling~ : Int, sampling~ : SamplingParameters, sampling_seed~ : SamplingSeed, stops~ : StopConditions, stream_preference~ : StreamPreference, deadline~ : DeadlineBudget, cache~ : CachePolicy, trace~ : TraceCorrelation?, limits~ : InferenceLimits) -> Self raise InferenceContractError
+pub fn GenerateRequest::protocol_version(Self) -> ProtocolVersion
+pub fn GenerateRequest::request_id(Self) -> RequestId
+pub fn GenerateRequest::sampling(Self) -> SamplingParameters
+pub fn GenerateRequest::sampling_seed(Self) -> SamplingSeed
+pub fn GenerateRequest::stops(Self) -> StopConditions
+pub fn GenerateRequest::stream_preference(Self) -> StreamPreference
+pub fn GenerateRequest::trace(Self) -> TraceCorrelation?
+
+pub struct InferenceLimits {
+  // private fields
+} derive(Eq, @debug.Debug)
+pub fn InferenceLimits::max_cache_scope_bytes(Self) -> Int
+pub fn InferenceLimits::max_context_tokens(Self) -> Int
+pub fn InferenceLimits::max_deadline_millis(Self) -> UInt64
+pub fn InferenceLimits::max_decoded_delta_bytes(Self) -> Int
+pub fn InferenceLimits::max_input_tokens(Self) -> Int
+pub fn InferenceLimits::max_new_tokens(Self) -> Int
+pub fn InferenceLimits::max_stop_string_bytes(Self) -> Int
+pub fn InferenceLimits::max_stop_strings(Self) -> Int
+pub fn InferenceLimits::max_stop_token_ids(Self) -> Int
+pub fn InferenceLimits::max_temperature(Self) -> Double
+pub fn InferenceLimits::max_text_bytes(Self) -> Int
+pub fn InferenceLimits::max_token_id(Self) -> Int
+pub fn InferenceLimits::max_top_k(Self) -> Int
+pub fn InferenceLimits::max_trace_bytes(Self) -> Int
+pub fn InferenceLimits::new(max_text_bytes~ : Int, max_input_tokens~ : Int, max_new_tokens~ : Int, max_context_tokens~ : Int, max_token_id~ : Int, max_stop_token_ids~ : Int, max_stop_strings~ : Int, max_stop_string_bytes~ : Int, max_trace_bytes~ : Int, max_cache_scope_bytes~ : Int, max_decoded_delta_bytes~ : Int, max_deadline_millis~ : UInt64, max_top_k~ : Int, max_temperature~ : Double) -> Self raise InferenceContractError
+
+pub(all) enum Input {
+  TokenIds(TokenBuffer)
+  Text(TextInput)
+}
+pub fn Input::from_token_ids(ArrayView[Int], InferenceLimits) -> Self raise InferenceContractError
+pub fn Input::from_utf8(BytesView, InferenceLimits) -> Self raise InferenceContractError
+
+pub struct LunaRequestPrefixView {
+  // private fields
+}
+pub fn LunaRequestPrefixView::binds_stop_tokens(Self, LunaRequestStopTokenView) -> Bool
+pub fn LunaRequestPrefixView::cache_permission(Self) -> CachePermission raise InferenceContractError
+pub fn LunaRequestPrefixView::is_live(Self) -> Bool
+pub fn LunaRequestPrefixView::scope_byte_at(Self, Int) -> Byte raise InferenceContractError
+pub fn LunaRequestPrefixView::scope_length(Self) -> Int raise InferenceContractError
+
+pub struct LunaRequestSemanticFailure {
+  // private fields
+}
+pub fn LunaRequestSemanticFailure::field(Self) -> ContractField
+pub fn LunaRequestSemanticFailure::index(Self) -> Int
+pub fn LunaRequestSemanticFailure::issue(Self) -> ContractIssue
+
+pub struct LunaRequestSemanticLease {
+  // private fields
+}
+pub fn LunaRequestSemanticLease::prefix_view(Self) -> LunaRequestPrefixView raise InferenceContractError
+pub fn LunaRequestSemanticLease::release(Self) -> Unit raise InferenceContractError
+pub fn LunaRequestSemanticLease::stop_token_view(Self) -> LunaRequestStopTokenView raise InferenceContractError
+pub fn LunaRequestSemanticLease::view(Self) -> LunaRequestSemanticView raise InferenceContractError
+
+pub struct LunaRequestSemanticProgress {
+  // private fields
+}
+pub fn LunaRequestSemanticProgress::is_failed(Self) -> Bool
+pub fn LunaRequestSemanticProgress::is_pending(Self) -> Bool
+pub fn LunaRequestSemanticProgress::is_ready(Self) -> Bool
+
+pub struct LunaRequestSemanticState {
+  // private fields
+}
+pub fn LunaRequestSemanticState::is_failed(Self) -> Bool
+pub fn LunaRequestSemanticState::is_ready(Self) -> Bool
+pub fn LunaRequestSemanticState::is_validating(Self) -> Bool
+
+pub struct LunaRequestSemanticStepBudget {
+  // private fields
+}
+pub fn LunaRequestSemanticStepBudget::new(Int) -> Self raise InferenceContractError
+pub fn LunaRequestSemanticStepBudget::work_units(Self) -> Int
+
+pub struct LunaRequestSemanticStopTokenStatus {
+  // private fields
+}
+pub fn LunaRequestSemanticStopTokenStatus::is_absent(Self) -> Bool
+pub fn LunaRequestSemanticStopTokenStatus::is_present(Self) -> Bool
+pub fn LunaRequestSemanticStopTokenStatus::is_stale(Self) -> Bool
+pub fn LunaRequestSemanticStopTokenStatus::work_units(Self) -> Int
+
+pub struct LunaRequestSemanticStorage {
+  // private fields
+}
+pub fn LunaRequestSemanticStorage::begin(Self, stop_token_count~ : Int, stop_string_count~ : Int, cache_scope_byte_count~ : Int, cache_permission~ : CachePermission) -> LunaRequestSemanticWrite raise InferenceContractError
+pub fn LunaRequestSemanticStorage::new(InferenceLimits, LunaRequestSemanticStepBudget) -> Self raise InferenceContractError
+pub fn LunaRequestSemanticStorage::required_byte_cells(InferenceLimits) -> UInt64 raise InferenceContractError
+pub fn LunaRequestSemanticStorage::required_int_cells(InferenceLimits) -> UInt64 raise InferenceContractError
+
+pub struct LunaRequestSemanticView {
+  // private fields
+}
+pub fn LunaRequestSemanticView::cache_permission(Self) -> CachePermission raise InferenceContractError
+pub fn LunaRequestSemanticView::cache_scope_byte_at(Self, Int) -> Byte raise InferenceContractError
+pub fn LunaRequestSemanticView::cache_scope_length(Self) -> Int raise InferenceContractError
+pub fn LunaRequestSemanticView::inference_limits(Self) -> InferenceLimits raise InferenceContractError
+pub fn LunaRequestSemanticView::is_stop_token(Self, Int) -> LunaRequestSemanticStopTokenStatus
+pub fn LunaRequestSemanticView::stop_string_byte_at(Self, string_index~ : Int, byte_index~ : Int) -> Byte raise InferenceContractError
+pub fn LunaRequestSemanticView::stop_string_count(Self) -> Int raise InferenceContractError
+pub fn LunaRequestSemanticView::stop_string_length(Self, Int) -> Int raise InferenceContractError
+pub fn LunaRequestSemanticView::stop_token_at(Self, Int) -> Int raise InferenceContractError
+pub fn LunaRequestSemanticView::stop_token_count(Self) -> Int raise InferenceContractError
+
+pub struct LunaRequestSemanticWork {
+  // private fields
+}
+pub fn LunaRequestSemanticWork::abort(Self) -> Unit raise InferenceContractError
+pub fn LunaRequestSemanticWork::failure(Self) -> LunaRequestSemanticFailure raise InferenceContractError
+pub fn LunaRequestSemanticWork::last_work_units(Self) -> Int raise InferenceContractError
+pub fn LunaRequestSemanticWork::progress(Self) -> LunaRequestSemanticProgress raise InferenceContractError
+pub fn LunaRequestSemanticWork::state(Self) -> LunaRequestSemanticState raise InferenceContractError
+pub fn LunaRequestSemanticWork::take_lease(Self) -> LunaRequestSemanticLease raise InferenceContractError
+pub fn LunaRequestSemanticWork::total_work_units(Self) -> UInt64 raise InferenceContractError
+
+pub struct LunaRequestSemanticWrite {
+  // private fields
+}
+pub fn LunaRequestSemanticWrite::abort(Self) -> Unit raise InferenceContractError
+pub fn LunaRequestSemanticWrite::finish(Self) -> LunaRequestSemanticWork raise InferenceContractError
+pub fn LunaRequestSemanticWrite::push_cache_scope_byte(Self, Byte) -> Unit raise InferenceContractError
+pub fn LunaRequestSemanticWrite::push_stop_string_byte(Self, Byte) -> Unit raise InferenceContractError
+pub fn LunaRequestSemanticWrite::push_stop_string_length(Self, Int) -> Unit raise InferenceContractError
+pub fn LunaRequestSemanticWrite::push_stop_token(Self, Int) -> Unit raise InferenceContractError
+
+pub struct LunaRequestStopTokenRetentionSlot {
+  // private fields
+}
+pub fn LunaRequestStopTokenRetentionSlot::is_live(Self) -> Bool
+pub fn LunaRequestStopTokenRetentionSlot::is_stop_token(Self, Int) -> LunaRequestSemanticStopTokenStatus
+pub fn LunaRequestStopTokenRetentionSlot::new() -> Self
+pub fn LunaRequestStopTokenRetentionSlot::release(Self) -> Unit raise InferenceContractError
+
+pub struct LunaRequestStopTokenView {
+  // private fields
+}
+pub fn LunaRequestStopTokenView::is_live(Self) -> Bool
+pub fn LunaRequestStopTokenView::is_stop_token(Self, Int) -> LunaRequestSemanticStopTokenStatus
+pub fn LunaRequestStopTokenView::retain_into(Self, LunaRequestStopTokenRetentionSlot) -> Unit raise InferenceContractError
+
+pub struct LunaTextRequestHandoffClaim {
+  // private fields
+}
+pub fn LunaTextRequestHandoffClaim::prompt_byte_at(Self, Int) -> Byte raise InferenceContractError
+pub fn LunaTextRequestHandoffClaim::prompt_length(Self) -> Int raise InferenceContractError
+pub fn LunaTextRequestHandoffClaim::release(Self) -> Unit raise InferenceContractError
+pub fn LunaTextRequestHandoffClaim::take_semantics(Self) -> LunaRequestSemanticLease raise InferenceContractError
+
+pub struct LunaTextRequestHandoffLease {
+  // private fields
+}
+pub fn LunaTextRequestHandoffLease::deadline(Self) -> DeadlineBudget raise InferenceContractError
+pub fn LunaTextRequestHandoffLease::effective_limits(Self) -> EffectiveLimits raise InferenceContractError
+pub fn LunaTextRequestHandoffLease::inference_limits(Self) -> InferenceLimits raise InferenceContractError
+pub fn LunaTextRequestHandoffLease::model_identity(Self) -> @spec.ModelIdentity raise InferenceContractError
+pub fn LunaTextRequestHandoffLease::prompt_byte_at(Self, Int) -> Byte raise InferenceContractError
+pub fn LunaTextRequestHandoffLease::prompt_length(Self) -> Int raise InferenceContractError
+pub fn LunaTextRequestHandoffLease::release(Self) -> Unit raise InferenceContractError
+pub fn LunaTextRequestHandoffLease::request_id(Self) -> RequestId raise InferenceContractError
+pub fn LunaTextRequestHandoffLease::sampling_seed(Self) -> SamplingSeed raise InferenceContractError
+pub fn LunaTextRequestHandoffLease::semantic_view(Self) -> LunaRequestSemanticView raise InferenceContractError
+pub fn LunaTextRequestHandoffLease::stream_preference(Self) -> StreamPreference raise InferenceContractError
+pub fn LunaTextRequestHandoffLease::take_claim(Self) -> LunaTextRequestHandoffClaim raise InferenceContractError
+pub fn LunaTextRequestHandoffLease::validated_sampling(Self) -> LunaValidatedSampling raise InferenceContractError
+
+pub struct LunaTextRequestHandoffStorage {
+  // private fields
+}
+pub fn LunaTextRequestHandoffStorage::begin(Self, prompt_byte_limit~ : Int, stop_token_count~ : Int, stop_string_count~ : Int, request_id~ : RequestId, effective~ : EffectiveLimits, sampling~ : LunaValidatedSampling, sampling_seed~ : SamplingSeed, stream_preference~ : StreamPreference, deadline~ : DeadlineBudget) -> LunaTextRequestHandoffWrite raise InferenceContractError
+pub fn LunaTextRequestHandoffStorage::new(InferenceLimits, @spec.ModelIdentity, CacheScope, LunaRequestSemanticStepBudget) -> Self raise InferenceContractError
+pub fn LunaTextRequestHandoffStorage::required_byte_cells(InferenceLimits) -> UInt64 raise InferenceContractError
+pub fn LunaTextRequestHandoffStorage::required_int_cells(InferenceLimits) -> UInt64 raise InferenceContractError
+pub fn LunaTextRequestHandoffStorage::required_reference_cells() -> UInt64
+
+pub struct LunaTextRequestHandoffWork {
+  // private fields
+}
+pub fn LunaTextRequestHandoffWork::abort(Self) -> Unit raise InferenceContractError
+pub fn LunaTextRequestHandoffWork::progress(Self) -> LunaRequestSemanticProgress raise InferenceContractError
+pub fn LunaTextRequestHandoffWork::take_lease(Self) -> LunaTextRequestHandoffLease raise InferenceContractError
+
+pub struct LunaTextRequestHandoffWrite {
+  // private fields
+}
+pub fn LunaTextRequestHandoffWrite::abort(Self) -> Unit raise InferenceContractError
+pub fn LunaTextRequestHandoffWrite::finish(Self) -> LunaTextRequestHandoffWork raise InferenceContractError
+pub fn LunaTextRequestHandoffWrite::push_prompt_byte(Self, Byte) -> Unit raise InferenceContractError
+pub fn LunaTextRequestHandoffWrite::push_stop_string_byte(Self, Byte) -> Unit raise InferenceContractError
+pub fn LunaTextRequestHandoffWrite::push_stop_string_length(Self, Int) -> Unit raise InferenceContractError
+pub fn LunaTextRequestHandoffWrite::push_stop_token(Self, Int) -> Unit raise InferenceContractError
+
+pub struct LunaTokenBufferBoundStatus {
+  // private fields
+}
+pub fn LunaTokenBufferBoundStatus::is_out_of_range(Self) -> Bool
+pub fn LunaTokenBufferBoundStatus::is_stale(Self) -> Bool
+pub fn LunaTokenBufferBoundStatus::is_within_bound(Self) -> Bool
+
+pub struct LunaTokenBufferLease {
+  // private fields
+}
+pub fn LunaTokenBufferLease::release(Self) -> Unit raise InferenceContractError
+pub fn LunaTokenBufferLease::token_buffer(Self) -> TokenBuffer raise InferenceContractError
+
+pub struct LunaTokenBufferReadStatus(Int, Int)
+pub fn LunaTokenBufferReadStatus::is_ready(Self) -> Bool
+pub fn LunaTokenBufferReadStatus::is_stale(Self) -> Bool
+pub fn LunaTokenBufferReadStatus::token_id(Self) -> Int
+
+pub struct LunaTokenBufferStorage {
+  // private fields
+}
+pub fn LunaTokenBufferStorage::begin(Self, token_count~ : Int) -> LunaTokenBufferWrite raise InferenceContractError
+pub fn LunaTokenBufferStorage::capacity(Self) -> Int
+pub fn LunaTokenBufferStorage::new(capacity~ : Int, limits~ : InferenceLimits) -> Self raise InferenceContractError
+pub fn LunaTokenBufferStorage::required_int_cells(Int) -> UInt64 raise InferenceContractError
+
+pub struct LunaTokenBufferWrite {
+  // private fields
+}
+pub fn LunaTokenBufferWrite::abort(Self) -> Unit raise InferenceContractError
+pub fn LunaTokenBufferWrite::push(Self, Int) -> Unit raise InferenceContractError
+pub fn LunaTokenBufferWrite::seal(Self) -> LunaTokenBufferLease raise InferenceContractError
+pub fn LunaTokenBufferWrite::written_count(Self) -> Int raise InferenceContractError
+
+pub struct LunaValidatedSampling {
+  // private fields
+}
+pub fn LunaValidatedSampling::greedy() -> Self
+pub fn LunaValidatedSampling::materialize(Self) -> SamplingParameters
+pub fn LunaValidatedSampling::sample(temperature~ : Double, has_top_k~ : Bool, top_k~ : Int, has_top_p~ : Bool, top_p~ : Double, InferenceLimits) -> Self raise InferenceContractError
+
+pub struct ProtocolVersion {
+  // private fields
+} derive(Eq, @debug.Debug)
+pub fn ProtocolVersion::from_wire(Int) -> Self raise InferenceContractError
+pub fn ProtocolVersion::v1() -> Self
+pub fn ProtocolVersion::wire_code(Self) -> Int
+
+pub struct PublicErrorCode {
+  value : String
+}
+pub fn PublicErrorCode::as_string(Self) -> String
+pub fn PublicErrorCode::from_ascii(BytesView) -> Self raise InferenceContractError
+
+pub struct RequestGeneration {
+  value : UInt64
+} derive(Eq, @debug.Debug)
+pub fn RequestGeneration::from_wire(UInt64) -> Self
+pub fn RequestGeneration::initial() -> Self
+pub fn RequestGeneration::next(Self) -> Self raise InferenceContractError
+pub fn RequestGeneration::value(Self) -> UInt64
+
+pub struct RequestId {
+  // private fields
+} derive(Eq, @debug.Debug)
+pub fn RequestId::new(UInt64) -> Self raise InferenceContractError
+pub fn RequestId::value(Self) -> UInt64
+
+pub(all) enum SamplingMode {
+  Greedy
+  Sample
+} derive(Eq, @debug.Debug)
+
+pub struct SamplingParameters {
+  // private fields
+} derive(Eq, @debug.Debug)
+pub fn SamplingParameters::greedy() -> Self
+pub fn SamplingParameters::mode(Self) -> SamplingMode
+pub fn SamplingParameters::sample(temperature~ : Double, top_k? : Int, top_p? : Double, InferenceLimits) -> Self raise InferenceContractError
+pub fn SamplingParameters::temperature(Self) -> Double
+pub fn SamplingParameters::top_k(Self) -> Int?
+pub fn SamplingParameters::top_p(Self) -> Double?
+
+pub struct SamplingSeed {
+  // private fields
+} derive(Eq)
+pub fn SamplingSeed::new(UInt64) -> Self raise InferenceContractError
+pub fn SamplingSeed::value(Self) -> UInt64
+
+pub struct StopConditions {
+  // private fields
+}
+pub fn StopConditions::new(ArrayView[Int], ArrayView[Bytes], InferenceLimits) -> Self raise InferenceContractError
+pub fn StopConditions::strings(Self) -> ReadOnlyArray[String]
+pub fn StopConditions::token_ids(Self) -> ReadOnlyArray[Int]
+pub fn StopConditions::token_only(Self) -> Self
+
+pub(all) enum StreamEvent {
+  Accepted(AcceptedEvent)
+  Token(TokenEvent)
+  Usage(Usage)
+  Completed(CompletedEvent)
+  Failed(FailedEvent)
+}
+
+pub(all) enum StreamPreference {
+  Streaming
+  Buffered
+} derive(Eq, @debug.Debug)
+
+pub struct TextInput {
+  // private fields
+}
+pub fn TextInput::from_utf8(BytesView, InferenceLimits) -> Self raise InferenceContractError
+pub fn TextInput::text(Self) -> String
+pub fn TextInput::utf8(Self) -> Bytes
+pub fn TextInput::utf8_bytes(Self) -> Int
+
+pub struct TokenBuffer {
+  // private fields
+}
+pub fn TokenBuffer::is_live(Self) -> Bool
+pub fn TokenBuffer::length(Self) -> Int
+pub fn TokenBuffer::maximum_token_status(Self, Int) -> LunaTokenBufferBoundStatus
+pub fn TokenBuffer::new(ArrayView[Int], InferenceLimits) -> Self raise InferenceContractError
+pub fn TokenBuffer::token_at(Self, Int) -> Int raise InferenceContractError
+pub fn TokenBuffer::token_status(Self, Int) -> LunaTokenBufferReadStatus
+
+pub struct TokenEvent {
+  token_id : Int
+  decoded_delta : DecodedDelta?
+  position : Int
+}
+pub fn TokenEvent::decoded_delta(Self) -> DecodedDelta?
+pub fn TokenEvent::new(token_id~ : Int, decoded_delta~ : DecodedDelta?, position~ : Int, InferenceLimits) -> Self raise InferenceContractError
+pub fn TokenEvent::position(Self) -> Int
+pub fn TokenEvent::token_id(Self) -> Int
+
+pub struct TraceCorrelation {
+  // private fields
+}
+pub fn TraceCorrelation::as_string(Self) -> String
+pub fn TraceCorrelation::from_ascii(BytesView, InferenceLimits) -> Self raise InferenceContractError
+
+pub struct Usage {
+  input_tokens : Int
+  cached_input_tokens : Int
+  output_tokens : Int
+  total_tokens : Int
+} derive(Eq, @debug.Debug)
+pub fn Usage::advance(Self, output_tokens~ : Int, InferenceLimits) -> Self raise InferenceContractError
+pub fn Usage::cached_input_tokens(Self) -> Int
+pub fn Usage::initial(input_tokens~ : Int, cached_input_tokens~ : Int, InferenceLimits) -> Self raise InferenceContractError
+pub fn Usage::input_tokens(Self) -> Int
+pub fn Usage::output_tokens(Self) -> Int
+pub fn Usage::total_tokens(Self) -> Int
+
+// Type aliases
+
+// Traits

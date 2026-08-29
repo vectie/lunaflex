@@ -1,0 +1,23 @@
+import {
+  "vectie/lunaflex/kernels/catalog",
+  "vectie/lunaflex/model/device_materialize",
+  "vectie/lunaflex/model/numeric_contract",
+  "vectie/lunaflex/model/plan",
+  "vectie/lunaflex/model/spec",
+}
+
+import {
+  "vectie/lunaflex/engine/device_memory",
+  "vectie/lunaflex/engine/device_profile",
+  "vectie/lunaflex/kv/device_layout",
+  "vectie/lunaflex/model/llama",
+  "vectie/lunaflex/model/llama_weights",
+  "vectie/lunaflex/model/plan_test_fixture",
+  "vectie/lunaflex/model/safetensors",
+} for "test"
+
+import {
+  "vectie/lunaflex/model/plan_test_fixture",
+} for "wbtest"
+
+supported_targets = "native"

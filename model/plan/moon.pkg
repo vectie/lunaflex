@@ -1,0 +1,12 @@
+import {
+  "vectie/lunaflex/internal/canonical_sha256",
+  "vectie/lunaflex/model/numeric_contract",
+  "vectie/lunaflex/model/spec",
+}
+
+import {
+  "moonbitlang/x/crypto",
+  "vectie/lunaflex/model/plan_test_fixture",
+} for "wbtest"
+
+supported_targets = "native"

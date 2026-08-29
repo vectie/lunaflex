@@ -1,0 +1,6 @@
+import {
+  "vectie/lunaflex/model/plan",
+  "vectie/lunaflex/model/spec",
+}
+
+supported_targets = "native"

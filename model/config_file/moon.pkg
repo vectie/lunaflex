@@ -1,0 +1,19 @@
+import {
+  "moonbitlang/async",
+  "moonbitlang/async/fs",
+  "moonbitlang/core/encoding/utf8",
+  "moonbitlang/x/crypto",
+} for "test"
+
+import {
+  "moonbitlang/core/encoding/utf8",
+} for "wbtest"
+
+import {
+  "moonbitlang/x/crypto",
+  "vectie/lunaflex/model/config_reader",
+  "vectie/lunaflex/model/spec",
+  "vectie/lunaflex/runtime/approved_fs",
+}
+
+supported_targets = "native"

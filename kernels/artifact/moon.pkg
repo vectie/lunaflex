@@ -1,0 +1,15 @@
+import {
+  "moonbitlang/x/crypto",
+  "vectie/lunaflex/kernels/catalog",
+  "vectie/lunaflex/kernels/launch_contract",
+  "vectie/lunaflex/model/spec",
+}
+
+import {
+  "vectie/lunaflex/kv/device_layout",
+  "vectie/lunaflex/model/plan",
+  "vectie/lunaflex/model/spec",
+  "vectie/lunaflex/model/plan_test_fixture",
+} for "test"
+
+supported_targets = "native"

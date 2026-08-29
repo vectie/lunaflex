@@ -1,0 +1,293 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "vectie/lunaflex/device"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn admit_finite_fp8_e4m3_w8a8(DeviceCapability) -> DeviceNumericCapability raise DeviceNumericCapabilityError
+
+pub fn admit_symmetric_i8_weight_only_per_output_channel_v1(DeviceCapability) -> DeviceNumericCapability raise DeviceNumericCapabilityError
+
+pub fn can_access_peer(Int, Int) -> Bool raise DeviceError
+
+pub fn open_context(Int) -> Context raise DeviceError
+
+pub fn probe() -> ProbeResult
+
+// Errors
+pub(all) suberror DeviceCapabilityObservationError {
+  InvalidDeviceCapabilityObservation(DeviceCapabilityObservationRule)
+} derive(Eq, @debug.Debug)
+
+pub(all) suberror DeviceError {
+  Unavailable(DeviceOperation)
+  InvalidArgument(DeviceOperation)
+  Closed(DeviceOperation)
+  Busy(DeviceOperation)
+  DriverFailure(DeviceOperation)
+  HostAllocationFailed(DeviceOperation)
+  SizeOverflow(DeviceOperation)
+  Unsupported(DeviceOperation)
+  InvalidOutput(DeviceOperation)
+} derive(Eq, @debug.Debug)
+
+pub(all) suberror DeviceNumericCapabilityError {
+  InvalidDeviceNumericCapability(DeviceNumericCapabilityRule)
+} derive(Eq, @debug.Debug)
+
+// Types and methods
+pub struct Allocation {
+  // private fields
+}
+pub fn Allocation::byte_count(Self) -> Int64
+pub fn Allocation::close(Self) -> Unit raise DeviceError
+pub fn Allocation::copy_from_host(Self, Bytes, Int64, Int64, Int64) -> Unit raise DeviceError
+pub fn Allocation::copy_to_host(Self, Int64, Int64) -> Bytes raise DeviceError
+
+pub struct AllocationLease {
+  // private fields
+}
+pub fn AllocationLease::close(Self) -> Unit raise DeviceError
+
+pub struct Bf16GemmPlan {
+  // private fields
+}
+pub fn Bf16GemmPlan::close(Self) -> Unit raise DeviceError
+pub fn Bf16GemmPlan::columns(Self) -> Int64
+pub fn Bf16GemmPlan::inner(Self) -> Int64
+pub fn Bf16GemmPlan::rows(Self) -> Int64
+pub fn Bf16GemmPlan::run(Self, Allocation, Int64, Allocation, Int64, Allocation, Int64, Allocation, Int64, Stream) -> Unit raise DeviceError
+pub fn Bf16GemmPlan::workspace_byte_count(Self) -> Int64
+
+pub struct Context {
+  // private fields
+}
+pub fn Context::allocate(Self, Int64) -> Allocation raise DeviceError
+pub fn Context::capability(Self) -> DeviceCapability
+pub fn Context::close(Self) -> Unit raise DeviceError
+pub fn Context::copy_from_fixed_host(Self, Allocation, FixedArray[Byte], Int64, Int64, Int64) -> Unit raise DeviceError
+pub fn Context::copy_to_fixed_host(Self, Allocation, FixedArray[Byte], Int64, Int64, Int64) -> Unit raise DeviceError
+pub fn Context::create_cublas_lt(Self) -> CublasLt raise DeviceError
+pub fn Context::create_event(Self) -> Event raise DeviceError
+pub fn Context::create_ordered_kernel_executor(Self, Stream, ArrayView[OrderedKernelLaunch], policy? : OrderedKernelExecutionPolicy) -> OrderedKernelExecutor raise DeviceError
+pub fn Context::create_stream(Self) -> Stream raise DeviceError
+pub fn Context::device_identity(Self) -> ContextDeviceIdentity
+pub fn Context::lease_allocation(Self, Allocation) -> AllocationLease raise DeviceError
+pub fn Context::load_module(Self, Bytes) -> Module raise DeviceError
+pub fn Context::ordinal(Self) -> Int
+pub fn Context::validate_allocation_region(Self, Allocation, offset~ : Int64, byte_count~ : Int64, alignment~ : Int64) -> Unit raise DeviceError
+
+pub struct ContextDeviceIdentity {
+  // private fields
+} derive(Eq, @debug.Debug)
+pub fn ContextDeviceIdentity::capability(Self) -> DeviceCapability
+pub fn ContextDeviceIdentity::name(Self) -> String
+pub fn ContextDeviceIdentity::ordinal(Self) -> Int
+pub fn ContextDeviceIdentity::pci(Self) -> String
+pub fn ContextDeviceIdentity::total_memory_bytes(Self) -> Int64
+pub fn ContextDeviceIdentity::uuid(Self) -> String
+
+pub struct CublasLt {
+  // private fields
+}
+pub fn CublasLt::close(Self) -> Unit raise DeviceError
+pub fn CublasLt::create_bf16_gemm_plan(Self, Int64, Int64, Int64, Int64) -> Bf16GemmPlan raise DeviceError
+
+pub struct DeviceCapability {
+  compute_major : Int
+  compute_minor : Int
+  total_memory_bytes : Int64
+  supports_bf16 : Bool
+  supports_cublas_lt : Bool
+} derive(Eq, @debug.Debug)
+pub fn DeviceCapability::compute_major(Self) -> Int
+pub fn DeviceCapability::compute_minor(Self) -> Int
+pub fn DeviceCapability::from_observed_facts(compute_major~ : Int, compute_minor~ : Int, total_memory_bytes~ : Int64, supports_bf16~ : Bool, supports_cublas_lt~ : Bool) -> Self raise DeviceCapabilityObservationError
+pub fn DeviceCapability::supports_bf16(Self) -> Bool
+pub fn DeviceCapability::supports_cublas_lt(Self) -> Bool
+pub fn DeviceCapability::total_memory_bytes(Self) -> Int64
+
+pub(all) enum DeviceCapabilityObservationRule {
+  InvalidComputeCapability
+  InvalidTotalMemory
+} derive(Eq, @debug.Debug)
+
+pub struct DeviceInfo {
+  ordinal : Int
+  name : String
+  uuid : String
+  pci : String
+  capability : DeviceCapability
+} derive(Eq, @debug.Debug)
+pub fn DeviceInfo::capability(Self) -> DeviceCapability
+pub fn DeviceInfo::name(Self) -> String
+pub fn DeviceInfo::ordinal(Self) -> Int
+pub fn DeviceInfo::pci(Self) -> String
+pub fn DeviceInfo::uuid(Self) -> String
+
+pub struct DeviceNumericCapability {
+  // private fields
+} derive(Eq, @debug.Debug)
+pub fn DeviceNumericCapability::canonical_bytes(Self) -> Bytes
+pub fn DeviceNumericCapability::compute_major(Self) -> Int
+pub fn DeviceNumericCapability::compute_minor(Self) -> Int
+pub fn DeviceNumericCapability::digest(Self) -> DeviceNumericCapabilityDigest
+pub fn DeviceNumericCapability::feature(Self) -> DeviceNumericFeature
+pub fn DeviceNumericCapability::supports_bf16(Self) -> Bool
+pub fn DeviceNumericCapability::supports_cublas_lt(Self) -> Bool
+pub fn DeviceNumericCapability::version(Self) -> DeviceNumericCapabilityVersion
+
+pub struct DeviceNumericCapabilityDigest {
+  // private fields
+} derive(Eq, Hash, @debug.Debug)
+pub fn DeviceNumericCapabilityDigest::as_hex(Self) -> String
+
+pub(all) enum DeviceNumericCapabilityRule {
+  InvalidObservedCapability
+  UnsupportedArchitecture
+  MissingBf16BoundarySupport
+} derive(Eq, @debug.Debug)
+
+pub struct DeviceNumericCapabilityVersion {
+  // private fields
+} derive(Eq, @debug.Debug)
+pub fn DeviceNumericCapabilityVersion::as_int(Self) -> Int
+pub fn DeviceNumericCapabilityVersion::v1() -> Self
+
+pub(all) enum DeviceNumericFeature {
+  FiniteFp8E4M3W8A8F32AccumulateBf16OutputV1
+  SymmetricI8WeightOnlyPerOutputChannelF32ScaleF32AccumulateBf16OutputV1
+} derive(Eq, @debug.Debug)
+
+pub(all) enum DeviceOperation {
+  DeviceInventory
+  DevicePeerAccess
+  ContextCreate
+  ContextClose
+  StreamCreate
+  StreamClose
+  StreamSynchronize
+  EventCreate
+  EventClose
+  EventRecord
+  EventSynchronize
+  EventElapsed
+  AllocationCreate
+  AllocationClose
+  AllocationLeaseCreate
+  AllocationLeaseClose
+  AllocationRegionValidate
+  CopyToDevice
+  CopyToHost
+  ModuleLoad
+  ModuleClose
+  FunctionLoad
+  FunctionClose
+  AotKernelLaunch
+  OrderedExecutorCreate
+  OrderedExecutorEnqueue
+  OrderedExecutorGraphLaunch
+  OrderedExecutorRecord
+  OrderedExecutorPoll
+  OrderedExecutorWait
+  OrderedExecutorAbort
+  OrderedExecutorReset
+  OrderedExecutorClose
+  CublasLtCreate
+  CublasLtClose
+  Bf16GemmPlanCreate
+  Bf16GemmPlanClose
+  Bf16GemmRun
+} derive(Eq, @debug.Debug)
+
+pub struct Event {
+  // private fields
+}
+pub fn Event::close(Self) -> Unit raise DeviceError
+pub fn Event::elapsed_milliseconds(Self, Self) -> Double raise DeviceError
+pub fn Event::record(Self, Stream) -> Unit raise DeviceError
+pub fn Event::synchronize(Self) -> Unit raise DeviceError
+
+pub struct Function {
+  // private fields
+}
+pub fn Function::close(Self) -> Unit raise DeviceError
+pub fn Function::launch_synchronous(Self, KernelLaunchDimensions, KernelArguments, Stream) -> Unit raise DeviceError
+
+pub struct KernelArgument {
+  // private fields
+}
+pub fn KernelArgument::device_region(Allocation, offset~ : Int64, byte_count~ : Int64, alignment~ : Int64) -> Self raise DeviceError
+
+pub struct KernelArguments {
+  // private fields
+}
+pub fn KernelArguments::length(Self) -> Int
+pub fn KernelArguments::new(ArrayView[KernelArgument]) -> Self raise DeviceError
+
+pub struct KernelLaunchDimensions {
+  // private fields
+}
+pub fn KernelLaunchDimensions::new(grid_x~ : Int, grid_y~ : Int, grid_z~ : Int, block_x~ : Int, block_y~ : Int, block_z~ : Int, shared_memory_bytes~ : Int) -> Self raise DeviceError
+
+pub struct Module {
+  // private fields
+}
+pub fn Module::close(Self) -> Unit raise DeviceError
+pub fn Module::load_function(Self, Bytes) -> Function raise DeviceError
+
+pub(all) enum OrderedKernelExecutionMode {
+  OrderedKernelEager
+  OrderedKernelCaptured
+} derive(Eq, @debug.Debug)
+
+pub(all) enum OrderedKernelExecutionPolicy {
+  OrderedKernelEagerOnly
+  OrderedKernelCaptureRequired
+  OrderedKernelCaptureWithEagerFallback
+} derive(Eq, @debug.Debug)
+
+pub struct OrderedKernelExecutor {
+  // private fields
+}
+pub fn OrderedKernelExecutor::abort(Self) -> Unit raise DeviceError
+pub fn OrderedKernelExecutor::close(Self) -> Unit raise DeviceError
+pub fn OrderedKernelExecutor::enqueue(Self, Int) -> Unit raise DeviceError
+pub fn OrderedKernelExecutor::execution_mode(Self) -> OrderedKernelExecutionMode
+pub fn OrderedKernelExecutor::kernel_count(Self) -> Int
+pub fn OrderedKernelExecutor::launch_captured(Self) -> Unit raise DeviceError
+pub fn OrderedKernelExecutor::poll_completion(Self) -> Bool raise DeviceError
+pub fn OrderedKernelExecutor::record_completion(Self) -> Unit raise DeviceError
+pub fn OrderedKernelExecutor::reset(Self) -> Unit raise DeviceError
+pub fn OrderedKernelExecutor::wait_completion(Self) -> Unit raise DeviceError
+
+pub struct OrderedKernelLaunch {
+  // private fields
+}
+pub fn OrderedKernelLaunch::new(Function, KernelLaunchDimensions, KernelArguments) -> Self
+
+pub(all) enum ProbeResult {
+  Available(driver_version~ : Int, devices~ : ReadOnlyArray[DeviceInfo])
+  Unavailable(UnavailableReason)
+} derive(Eq, @debug.Debug)
+
+pub struct Stream {
+  // private fields
+}
+pub fn Stream::close(Self) -> Unit raise DeviceError
+pub fn Stream::synchronize(Self) -> Unit raise DeviceError
+
+pub(all) enum UnavailableReason {
+  UnsupportedPlatform
+  DriverLibraryMissing
+  DriverAbiIncomplete
+  DriverInitializationFailed
+  NoDevices
+  InventoryFailed
+} derive(Eq, @debug.Debug)
+
+// Type aliases
+
+// Traits
