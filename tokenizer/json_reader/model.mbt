@@ -1,13 +1,13 @@
 ///|
 priv struct ParsedVocabulary {
   entries : Array[@tokenizer.VocabularyEntry]
-  normal_id_by_piece : Map[Bytes, Int]
+  normal_id_by_piece : Map[Bytes, Int32]
 }
 
 ///|
 fn parse_vocabulary(
   value : Json,
-  specials : Map[Int, AddedSpecial],
+  specials : Map[Int32, AddedSpecial],
   limits : @tokenizer.TokenizerLimits,
   profile : TokenizerJsonProfile,
 ) -> ParsedVocabulary raise TokenizerJsonError {
@@ -18,8 +18,8 @@ fn parse_vocabulary(
     raise VocabularyLimitExceeded(limit=limits.max_vocab_entries)
   }
   let entries : Array[@tokenizer.VocabularyEntry] = []
-  let normal_id_by_piece : Map[Bytes, Int] = Map([], capacity=vocab.length())
-  let raw_id_by_token : Map[String, Int] = Map([], capacity=vocab.length())
+  let normal_id_by_piece : Map[Bytes, Int32] = Map([], capacity=vocab.length())
+  let raw_id_by_token : Map[String, Int32] = Map([], capacity=vocab.length())
   for raw_piece, id_value in vocab {
     let id = decode_vocab_id(id_value, entries.length())
     let (piece, kind) = match specials.get(id) {
@@ -40,7 +40,7 @@ fn parse_vocabulary(
             }
         }
     }
-    entries.push({ token_id: id, piece, kind })
+    entries.push({ token_id: id, piece, kind, })
     raw_id_by_token[raw_piece] = id
     if kind is Normal {
       normal_id_by_piece[piece] = id
@@ -52,17 +52,20 @@ fn parse_vocabulary(
       _ => raise AddedTokenNotInVocabulary(index=special.source_index)
     }
   }
-  { entries, normal_id_by_piece }
+  { entries, normal_id_by_piece, }
 }
 
 ///|
-fn decode_vocab_id(value : Json, index : Int) -> Int raise TokenizerJsonError {
+fn decode_vocab_id(
+  value : Json,
+  index : Int32,
+) -> Int32 raise TokenizerJsonError {
   guard value is Number(number, repr~) else {
     raise InvalidField(component=Model, field=Vocab, index~)
   }
-  let id : Int = match repr {
+  let id : Int32 = match repr {
     Some(encoded) =>
-      @strconv.from_str(encoded) catch {
+      @string.parse_int(encoded) catch {
         _ => raise InvalidField(component=Model, field=Vocab, index~)
       }
     None => {
@@ -79,7 +82,7 @@ fn decode_vocab_id(value : Json, index : Int) -> Int raise TokenizerJsonError {
 ///|
 fn split_merge_row(
   row : String,
-  index : Int,
+  index : Int32,
 ) -> (String, String) raise TokenizerJsonError {
   let mut separator = -1
   for offset in 0..<row.length() {
@@ -99,7 +102,7 @@ fn split_merge_row(
 ///|
 fn decode_merge_pair(
   value : Json,
-  index : Int,
+  index : Int32,
 ) -> (String, String) raise TokenizerJsonError {
   match value {
     String(row) => split_merge_row(row, index)
@@ -167,7 +170,7 @@ fn parse_merges(
 ///|
 fn parse_model(
   value : Json,
-  specials : Map[Int, AddedSpecial],
+  specials : Map[Int32, AddedSpecial],
   digest : @tokenizer.TokenizerDigest,
   limits : @tokenizer.TokenizerLimits,
   profile : TokenizerJsonProfile,
@@ -285,7 +288,7 @@ fn parse_model(
 }
 
 ///|
-fn hex_nibble(code : UInt16) -> Int? {
+fn hex_nibble(code : UInt16) -> Int32? {
   if code >= '0' && code <= '9' {
     Some(code.to_int() - 0x30)
   } else if code >= 'A' && code <= 'F' {
