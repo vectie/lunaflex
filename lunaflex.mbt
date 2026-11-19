@@ -17,7 +17,7 @@ pub fn core_version() -> String {
 
 ///|
 /// Compile-time integration ABI for consumers such as LunaFlux.
-pub fn core_abi_version() -> Int {
+pub fn core_abi_version() -> Int32 {
   1
 }
 
@@ -37,7 +37,7 @@ pub fn core_capabilities() -> ReadOnlyArray[CoreCapability] {
 ///|
 /// Tests whether this build satisfies a consumer's narrow core contract.
 pub fn is_core_compatible(
-  required_abi : Int,
+  required_abi : Int32,
   required_capabilities : ArrayView[CoreCapability],
 ) -> Bool {
   if required_abi != core_abi_version() {

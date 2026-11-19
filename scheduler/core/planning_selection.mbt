@@ -1,5 +1,5 @@
 ///|
-fn smaller(left : Int, right : Int) -> Int {
+fn smaller(left : Int32, right : Int32) -> Int32 {
   if left < right {
     left
   } else {
@@ -35,8 +35,8 @@ fn Scheduler::clear_selection(self : Scheduler) -> Unit {
 ///|
 fn Scheduler::table_page_count(
   self : Scheduler,
-  slot : Int,
-) -> Int raise SchedulerError {
+  slot : Int32,
+) -> Int32 raise SchedulerError {
   let table = self.request_tables.read(slot) catch {
     error => raise BlockTable(error)
   }
@@ -48,8 +48,8 @@ fn Scheduler::table_page_count(
 ///|
 fn Scheduler::slot_page_count(
   self : Scheduler,
-  slot : Int,
-) -> Int raise SchedulerError {
+  slot : Int32,
+) -> Int32 raise SchedulerError {
   let occupied = try self.request_tables.is_occupied(slot) catch {
     error => raise BlockTable(error)
   } noraise {
@@ -63,7 +63,7 @@ fn Scheduler::slot_page_count(
 }
 
 ///|
-fn Scheduler::oldest_prefill(self : Scheduler) -> Int {
+fn Scheduler::oldest_prefill(self : Scheduler) -> Int32 {
   let mut oldest = self.waiting_head
   for index in 0..<self.active_count {
     let slot = self.active_slots[index]
@@ -81,7 +81,7 @@ fn Scheduler::oldest_prefill(self : Scheduler) -> Int {
 }
 
 ///|
-fn Scheduler::is_aged(self : Scheduler, slot : Int) -> Bool {
+fn Scheduler::is_aged(self : Scheduler, slot : Int32) -> Bool {
   slot != NO_INDEX &&
   self.step >= self.admitted_steps[slot] &&
   self.step - self.admitted_steps[slot] >=
@@ -89,7 +89,7 @@ fn Scheduler::is_aged(self : Scheduler, slot : Int) -> Bool {
 }
 
 ///|
-fn Scheduler::select_rows(self : Scheduler) -> Int raise SchedulerError {
+fn Scheduler::select_rows(self : Scheduler) -> Int32 raise SchedulerError {
   self.clear_selection()
   let row_limit = self.capacity.max_rows_per_step()
   let mut token_left = self.capacity.step_token_budget()

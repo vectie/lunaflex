@@ -1,7 +1,7 @@
 ///|
 fn luna_work_limits(
-  max_input_bytes? : Int = 128,
-  max_output_tokens? : Int = 128,
+  max_input_bytes~ : Int32 = 128,
+  max_output_tokens~ : Int32 = 128,
 ) -> TokenizerLimits {
   {
     max_input_bytes,
@@ -18,7 +18,7 @@ fn luna_work_limits(
 fn luna_work_vocabulary() -> Array[VocabularyEntry] {
   let vocabulary : Array[VocabularyEntry] = []
   for value in 0..<256 {
-    vocabulary.push({ token_id: value, piece: [value.to_byte()], kind: Normal })
+    vocabulary.push({ token_id: value, piece: [value.to_byte()], kind: Normal, })
   }
   vocabulary
 }
@@ -31,23 +31,23 @@ fn luna_work_digest() -> TokenizerDigest raise {
 ///|
 fn luna_work_corpus_spec() -> TokenizerSpec raise {
   let vocabulary = luna_work_vocabulary()
-  vocabulary.push({ token_id: 256, piece: b"he", kind: Normal })
-  vocabulary.push({ token_id: 257, piece: b"hel", kind: Normal })
-  vocabulary.push({ token_id: 258, piece: b"hell", kind: Normal })
-  vocabulary.push({ token_id: 259, piece: b"hello", kind: Normal })
-  vocabulary.push({ token_id: 260, piece: b"ab", kind: Normal })
-  vocabulary.push({ token_id: 261, piece: b"bc", kind: Normal })
-  vocabulary.push({ token_id: 262, piece: b"<e", kind: Special })
-  vocabulary.push({ token_id: 263, piece: b"<eos>", kind: Special })
+  vocabulary.push({ token_id: 256, piece: b"he", kind: Normal, })
+  vocabulary.push({ token_id: 257, piece: b"hel", kind: Normal, })
+  vocabulary.push({ token_id: 258, piece: b"hell", kind: Normal, })
+  vocabulary.push({ token_id: 259, piece: b"hello", kind: Normal, })
+  vocabulary.push({ token_id: 260, piece: b"ab", kind: Normal, })
+  vocabulary.push({ token_id: 261, piece: b"bc", kind: Normal, })
+  vocabulary.push({ token_id: 262, piece: b"<e", kind: Special, })
+  vocabulary.push({ token_id: 263, piece: b"<eos>", kind: Special, })
   TokenizerSpec::new(
     vocabulary,
     [
-      { left_token_id: 104, right_token_id: 101, result_token_id: 256 },
-      { left_token_id: 256, right_token_id: 108, result_token_id: 257 },
-      { left_token_id: 257, right_token_id: 108, result_token_id: 258 },
-      { left_token_id: 258, right_token_id: 111, result_token_id: 259 },
-      { left_token_id: 97, right_token_id: 98, result_token_id: 260 },
-      { left_token_id: 98, right_token_id: 99, result_token_id: 261 },
+      { left_token_id: 104, right_token_id: 101, result_token_id: 256, },
+      { left_token_id: 256, right_token_id: 108, result_token_id: 257, },
+      { left_token_id: 257, right_token_id: 108, result_token_id: 258, },
+      { left_token_id: 258, right_token_id: 111, result_token_id: 259, },
+      { left_token_id: 97, right_token_id: 98, result_token_id: 260, },
+      { left_token_id: 98, right_token_id: 99, result_token_id: 261, },
     ],
     luna_work_digest(),
     luna_work_limits(),
@@ -57,10 +57,10 @@ fn luna_work_corpus_spec() -> TokenizerSpec raise {
 ///|
 fn luna_overlap_spec() -> TokenizerSpec raise {
   let vocabulary = luna_work_vocabulary()
-  vocabulary.push({ token_id: 256, piece: b"aa", kind: Normal })
+  vocabulary.push({ token_id: 256, piece: b"aa", kind: Normal, })
   TokenizerSpec::new(
     vocabulary,
-    [{ left_token_id: 97, right_token_id: 97, result_token_id: 256 }],
+    [{ left_token_id: 97, right_token_id: 97, result_token_id: 256, }],
     luna_work_digest(),
     luna_work_limits(),
   )
@@ -69,15 +69,15 @@ fn luna_overlap_spec() -> TokenizerSpec raise {
 ///|
 fn luna_new_better_rank_spec() -> TokenizerSpec raise {
   let vocabulary = luna_work_vocabulary()
-  vocabulary.push({ token_id: 256, piece: b"ab", kind: Normal })
-  vocabulary.push({ token_id: 257, piece: b"cd", kind: Normal })
-  vocabulary.push({ token_id: 258, piece: b"abc", kind: Normal })
+  vocabulary.push({ token_id: 256, piece: b"ab", kind: Normal, })
+  vocabulary.push({ token_id: 257, piece: b"cd", kind: Normal, })
+  vocabulary.push({ token_id: 258, piece: b"abc", kind: Normal, })
   TokenizerSpec::new(
     vocabulary,
     [
-      { left_token_id: 256, right_token_id: 99, result_token_id: 258 },
-      { left_token_id: 97, right_token_id: 98, result_token_id: 256 },
-      { left_token_id: 99, right_token_id: 100, result_token_id: 257 },
+      { left_token_id: 256, right_token_id: 99, result_token_id: 258, },
+      { left_token_id: 97, right_token_id: 98, result_token_id: 256, },
+      { left_token_id: 99, right_token_id: 100, result_token_id: 257, },
     ],
     luna_work_digest(),
     luna_work_limits(),
@@ -87,8 +87,8 @@ fn luna_new_better_rank_spec() -> TokenizerSpec raise {
 ///|
 struct LunaWorkRun {
   result : EncodeResult
-  progress_calls : Int
-  work_units : Int
+  progress_calls : Int32
+  work_units : Int32
 }
 
 ///|
@@ -96,9 +96,9 @@ fn run_luna_work(
   spec : TokenizerSpec,
   input : Bytes,
   special_policy : SpecialTokenPolicy,
-  output_limit : Int,
+  output_limit : Int32,
   truncation : TruncationPolicy,
-  budget_units : Int,
+  budget_units : Int32,
 ) -> LunaWorkRun raise {
   let budget = LunaTokenizerStepBudget::new(budget_units)
   let worker = LunaTokenizerWorker::new(
@@ -144,7 +144,7 @@ fn run_luna_work(
           assert_eq(work.last_work_units(), amount)
           copied += amount
         }
-        let token_ids : Array[Int] = []
+        let token_ids : Array[Int32] = []
         for token_id in destination {
           token_ids.push(token_id)
         }
@@ -167,13 +167,13 @@ fn assert_luna_work_equivalent(
   spec : TokenizerSpec,
   input : Bytes,
   special_policy : SpecialTokenPolicy,
-  output_limit : Int,
+  output_limit : Int32,
   truncation : TruncationPolicy,
 ) -> Unit raise {
   let expected = reference_encode_bytes(
     spec, input, special_policy, output_limit, truncation,
   )
-  let totals : Array[Int] = []
+  let totals : Array[Int32] = []
   for budget in [1, 17, 65536] {
     let actual = run_luna_work(
       spec, input, special_policy, output_limit, truncation, budget,

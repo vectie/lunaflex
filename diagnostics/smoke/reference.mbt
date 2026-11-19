@@ -2,9 +2,9 @@
 /// Result of executing the deterministic tiny-Llama acceptance path.
 pub struct ReferenceSmokeReport {
   core_version : String
-  operation_count : Int
-  input_tokens : Int
-  generated_tokens : ReadOnlyArray[Int]
+  operation_count : Int32
+  input_tokens : Int32
+  generated_tokens : ReadOnlyArray[Int32]
 } derive(Debug, Eq)
 
 ///|
@@ -17,19 +17,19 @@ pub fn ReferenceSmokeReport::core_version(
 ///|
 pub fn ReferenceSmokeReport::operation_count(
   self : ReferenceSmokeReport,
-) -> Int {
+) -> Int32 {
   self.operation_count
 }
 
 ///|
-pub fn ReferenceSmokeReport::input_tokens(self : ReferenceSmokeReport) -> Int {
+pub fn ReferenceSmokeReport::input_tokens(self : ReferenceSmokeReport) -> Int32 {
   self.input_tokens
 }
 
 ///|
 pub fn ReferenceSmokeReport::generated_tokens(
   self : ReferenceSmokeReport,
-) -> ReadOnlyArray[Int] {
+) -> ReadOnlyArray[Int32] {
   self.generated_tokens
 }
 
@@ -40,10 +40,14 @@ pub fn ReferenceSmokeReport::summary(self : ReferenceSmokeReport) -> String {
 
 ///|
 pub(all) suberror ReferenceSmokeError {
-  UnexpectedOperationCount(expected~ : Int, actual~ : Int)
-  UnexpectedSelection(expected~ : Int, actual~ : Int)
-  UnexpectedGeneratedCount(expected~ : Int, actual~ : Int)
-  UnexpectedGeneratedToken(position~ : Int, expected~ : Int, actual~ : Int)
+  UnexpectedOperationCount(expected~ : Int32, actual~ : Int32)
+  UnexpectedSelection(expected~ : Int32, actual~ : Int32)
+  UnexpectedGeneratedCount(expected~ : Int32, actual~ : Int32)
+  UnexpectedGeneratedToken(
+    position~ : Int32,
+    expected~ : Int32,
+    actual~ : Int32
+  )
 } derive(Debug, Eq)
 
 ///|

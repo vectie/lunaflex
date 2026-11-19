@@ -25,7 +25,7 @@ pub fn CachePolicy::new(
   scope : CacheScope,
   permission : CachePermission,
 ) -> CachePolicy {
-  { scope, permission }
+  { scope, permission, }
 }
 
 ///|
@@ -89,7 +89,7 @@ pub fn AdmissionDeadline::from_receipt(
   if received_at_millis > 0xffffffffffffffffUL - duration {
     raise invalid(DeadlineBudget, OutOfRange, 0)
   }
-  { at_millis: received_at_millis + duration }
+  { at_millis: received_at_millis + duration, }
 }
 
 ///|
@@ -109,13 +109,13 @@ pub fn AdmissionDeadline::is_expired(
 /// Immutable validated stop conditions. It deliberately has no `Debug` because
 /// stop strings are request payload.
 pub struct StopConditions {
-  priv token_ids : ReadOnlyArray[Int]
+  priv token_ids : ReadOnlyArray[Int32]
   priv strings : ReadOnlyArray[String]
 }
 
 ///|
 pub fn StopConditions::new(
-  token_ids : ArrayView[Int],
+  token_ids : ArrayView[Int32],
   strings : ArrayView[Bytes],
   limits : InferenceLimits,
 ) -> StopConditions raise InferenceContractError {
@@ -160,7 +160,7 @@ pub fn StopConditions::new(
 }
 
 ///|
-pub fn StopConditions::token_ids(self : StopConditions) -> ReadOnlyArray[Int] {
+pub fn StopConditions::token_ids(self : StopConditions) -> ReadOnlyArray[Int32] {
   self.token_ids
 }
 
@@ -177,7 +177,7 @@ pub fn StopConditions::strings(self : StopConditions) -> ReadOnlyArray[String] {
 /// carried into scheduler state.
 pub fn StopConditions::token_only(self : StopConditions) -> StopConditions {
   let empty : Array[String] = []
-  { token_ids: self.token_ids, strings: ReadOnlyArray::from_array(empty) }
+  { token_ids: self.token_ids, strings: ReadOnlyArray::from_array(empty), }
 }
 
 ///|
@@ -233,8 +233,8 @@ pub struct GenerateRequest {
   priv request_id : RequestId
   priv model_identity : @spec.ModelIdentity
   priv input : Input
-  priv max_new_tokens : Int
-  priv context_ceiling : Int
+  priv max_new_tokens : Int32
+  priv context_ceiling : Int32
   priv sampling : SamplingParameters
   priv sampling_seed : SamplingSeed
   priv stops : StopConditions
@@ -250,8 +250,8 @@ pub fn GenerateRequest::new(
   request_id~ : RequestId,
   model_identity~ : @spec.ModelIdentity,
   input~ : Input,
-  max_new_tokens~ : Int,
-  context_ceiling~ : Int,
+  max_new_tokens~ : Int32,
+  context_ceiling~ : Int32,
   sampling~ : SamplingParameters,
   sampling_seed~ : SamplingSeed,
   stops~ : StopConditions,
@@ -332,12 +332,12 @@ pub fn GenerateRequest::input(self : GenerateRequest) -> Input {
 }
 
 ///|
-pub fn GenerateRequest::max_new_tokens(self : GenerateRequest) -> Int {
+pub fn GenerateRequest::max_new_tokens(self : GenerateRequest) -> Int32 {
   self.max_new_tokens
 }
 
 ///|
-pub fn GenerateRequest::context_ceiling(self : GenerateRequest) -> Int {
+pub fn GenerateRequest::context_ceiling(self : GenerateRequest) -> Int32 {
   self.context_ceiling
 }
 

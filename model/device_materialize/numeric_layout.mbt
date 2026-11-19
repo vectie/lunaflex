@@ -1,5 +1,5 @@
 ///|
-const MAX_NUMERIC_LAYOUT_TENSORS : Int = 65536
+const MAX_NUMERIC_LAYOUT_TENSORS : Int32 = 65536
 
 ///|
 /// Plans one inert contiguous arena from the complete canonical numeric tensor
@@ -57,7 +57,7 @@ pub fn plan_numeric_layout(
     if next_end > max_arena_bytes {
       raise ArenaTooLarge
     }
-    regions.push({ reference, offset_bytes: offset, byte_length })
+    regions.push({ reference, offset_bytes: offset, byte_length, })
     end = next_end
     materialized = next_materialized
   }

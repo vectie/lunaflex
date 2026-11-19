@@ -2,27 +2,27 @@
 /// Opaque stored representation. Recognition grants no kernel authority.
 #valtype
 pub struct StorageDType {
-  priv value : Int
+  priv value : Int32
 } derive(Debug, Eq, Hash)
 
 ///|
 pub fn StorageDType::bfloat16() -> StorageDType {
-  { value: 1 }
+  { value: 1, }
 }
 
 ///|
 pub fn StorageDType::f8_e4m3_finite() -> StorageDType {
-  { value: 2 }
+  { value: 2, }
 }
 
 ///|
 pub fn StorageDType::i8() -> StorageDType {
-  { value: 3 }
+  { value: 3, }
 }
 
 ///|
 pub fn StorageDType::f32() -> StorageDType {
-  { value: 4 }
+  { value: 4, }
 }
 
 ///|
@@ -39,44 +39,44 @@ pub fn StorageDType::byte_width(self : StorageDType) -> Int64 {
 /// Canonical physical ordering for one stored tensor.
 #valtype
 pub struct StorageLayout {
-  priv value : Int
+  priv value : Int32
 } derive(Debug, Eq, Hash)
 
 ///|
 pub fn StorageLayout::dense_row_major_v1() -> StorageLayout {
-  { value: 1 }
+  { value: 1, }
 }
 
 ///|
 /// Storage encoding is separate from dtype and applies to one tensor only.
 #valtype
 pub struct StorageEncoding {
-  priv value : Int
+  priv value : Int32
 } derive(Debug, Eq, Hash)
 
 ///|
 pub fn StorageEncoding::plain_v1() -> StorageEncoding {
-  { value: 1 }
+  { value: 1, }
 }
 
 ///|
 pub fn StorageEncoding::scaled_v1() -> StorageEncoding {
-  { value: 2 }
+  { value: 2, }
 }
 
 ///|
 pub fn StorageEncoding::symmetric_v1() -> StorageEncoding {
-  { value: 3 }
+  { value: 3, }
 }
 
 ///|
 pub fn StorageEncoding::affine_v1() -> StorageEncoding {
-  { value: 4 }
+  { value: 4, }
 }
 
 ///|
 pub fn StorageEncoding::codebook_v1() -> StorageEncoding {
-  { value: 5 }
+  { value: 5, }
 }
 
 ///|
@@ -84,32 +84,32 @@ pub fn StorageEncoding::codebook_v1() -> StorageEncoding {
 /// only when the operation has no value in that role.
 #valtype
 pub struct ComputeDType {
-  priv value : Int
+  priv value : Int32
 } derive(Debug, Eq, Hash)
 
 ///|
 pub fn ComputeDType::absent() -> ComputeDType {
-  { value: 0 }
+  { value: 0, }
 }
 
 ///|
 pub fn ComputeDType::bfloat16() -> ComputeDType {
-  { value: 1 }
+  { value: 1, }
 }
 
 ///|
 pub fn ComputeDType::f8_e4m3_finite() -> ComputeDType {
-  { value: 2 }
+  { value: 2, }
 }
 
 ///|
 pub fn ComputeDType::i8() -> ComputeDType {
-  { value: 3 }
+  { value: 3, }
 }
 
 ///|
 pub fn ComputeDType::f32() -> ComputeDType {
-  { value: 4 }
+  { value: 4, }
 }
 
 ///|
@@ -117,7 +117,7 @@ pub fn ComputeDType::f32() -> ComputeDType {
 /// Weight scales remain tensor-local metadata in `TensorStorageContract`.
 #valtype
 pub struct ActivationScalePolicy {
-  priv value : Int
+  priv value : Int32
 } derive(Debug, Eq, Hash)
 
 ///|
@@ -127,26 +127,26 @@ pub struct ActivationScalePolicy {
 /// kernel authority, or evidence that an implementation exists.
 #valtype
 pub struct ActivationScaleStage {
-  priv value : Int
+  priv value : Int32
 } derive(Debug, Eq, Hash)
 
 ///|
 /// The exact external operation input consumed by a simple projection, or by
 /// both the gate and up projections of a gated MLP.
 pub fn ActivationScaleStage::external_operation_input_v1() -> ActivationScaleStage {
-  { value: 1 }
+  { value: 1, }
 }
 
 ///|
 /// The exact post-SiLU gate/up product consumed by the down projection of a
 /// gated MLP.
 pub fn ActivationScaleStage::post_silu_gate_up_product_v1() -> ActivationScaleStage {
-  { value: 2 }
+  { value: 2, }
 }
 
 ///|
 pub fn ActivationScalePolicy::absent_exact_v1() -> ActivationScalePolicy {
-  { value: 0 }
+  { value: 0, }
 }
 
 ///|
@@ -155,7 +155,7 @@ pub fn ActivationScalePolicy::absent_exact_v1() -> ActivationScalePolicy {
 /// rounding, zero-tensor, clamp, and reconstruction convention is specified in
 /// this package's README and is part of this v1 policy identity.
 pub fn ActivationScalePolicy::dynamic_per_tensor_f32_v1() -> ActivationScalePolicy {
-  { value: 1 }
+  { value: 1, }
 }
 
 ///|
@@ -164,7 +164,7 @@ pub fn ActivationScalePolicy::dynamic_per_tensor_f32_v1() -> ActivationScalePoli
 /// the down projection. The ordered stages and complete numerical convention
 /// are part of this policy identity and are specified in this package's README.
 pub fn ActivationScalePolicy::gated_mlp_external_and_post_silu_f32_v1() -> ActivationScalePolicy {
-  { value: 2 }
+  { value: 2, }
 }
 
 ///|
@@ -173,13 +173,15 @@ pub fn ActivationScalePolicy::gated_mlp_external_and_post_silu_f32_v1() -> Activ
 /// implementation. This identity never aliases the ideal correctly-rounded
 /// real exponential required by the v1 compound policy.
 pub fn ActivationScalePolicy::gated_mlp_external_and_post_silu_bound_expf_f32_v2() -> ActivationScalePolicy {
-  { value: 3 }
+  { value: 3, }
 }
 
 ///|
 /// Returns the exact number of ordered dynamic-scale stages owned by a known
 /// policy. Exact/no-scale policies return zero.
-pub fn ActivationScalePolicy::stage_count(self : ActivationScalePolicy) -> Int {
+pub fn ActivationScalePolicy::stage_count(
+  self : ActivationScalePolicy,
+) -> Int32 {
   match self.value {
     0 => 0
     1 => 1
@@ -192,7 +194,7 @@ pub fn ActivationScalePolicy::stage_count(self : ActivationScalePolicy) -> Int {
 /// Returns one typed stage in canonical order without allocating an array.
 pub fn ActivationScalePolicy::stage_at(
   self : ActivationScalePolicy,
-  index : Int,
+  index : Int32,
 ) -> ActivationScaleStage? {
   match (self.value, index) {
     (1 | 2 | 3, 0) => Some(ActivationScaleStage::external_operation_input_v1())
@@ -205,73 +207,73 @@ pub fn ActivationScalePolicy::stage_at(
 /// Accumulator representation for exactly one operation.
 #valtype
 pub struct AccumulatorDType {
-  priv value : Int
+  priv value : Int32
 } derive(Debug, Eq, Hash)
 
 ///|
 pub fn AccumulatorDType::f32() -> AccumulatorDType {
-  { value: 1 }
+  { value: 1, }
 }
 
 ///|
 pub fn AccumulatorDType::i32() -> AccumulatorDType {
-  { value: 2 }
+  { value: 2, }
 }
 
 ///|
 /// Conversion rounding semantics.
 #valtype
 pub struct RoundingPolicy {
-  priv value : Int
+  priv value : Int32
 } derive(Debug, Eq, Hash)
 
 ///|
 pub fn RoundingPolicy::exact_no_rounding_v1() -> RoundingPolicy {
-  { value: 0 }
+  { value: 0, }
 }
 
 ///|
 pub fn RoundingPolicy::nearest_ties_to_even_v1() -> RoundingPolicy {
-  { value: 1 }
+  { value: 1, }
 }
 
 ///|
 /// Conversion saturation semantics.
 #valtype
 pub struct SaturationPolicy {
-  priv value : Int
+  priv value : Int32
 } derive(Debug, Eq, Hash)
 
 ///|
 pub fn SaturationPolicy::none_v1() -> SaturationPolicy {
-  { value: 0 }
+  { value: 0, }
 }
 
 ///|
 pub fn SaturationPolicy::finite_storage_range_v1() -> SaturationPolicy {
-  { value: 1 }
+  { value: 1, }
 }
 
 ///|
 /// NaN and infinity handling before conversion or persistence.
 #valtype
 pub struct FiniteValuePolicy {
-  priv value : Int
+  priv value : Int32
 } derive(Debug, Eq, Hash)
 
 ///|
 pub fn FiniteValuePolicy::reject_non_finite_v1() -> FiniteValuePolicy {
-  { value: 1 }
+  { value: 1, }
 }
 
 ///|
 /// Floating-point operation-order authority for one operation.
 #valtype
 pub struct OperationOrderPolicy {
-  priv value : Int
+  priv value : Int32
 } derive(Debug, Eq, Hash)
 
 ///|
 pub fn OperationOrderPolicy::strict_declared_order_v1() -> OperationOrderPolicy {
-  { value: 1 }
+  { value: 1, }
 }

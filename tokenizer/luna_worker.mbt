@@ -1,8 +1,8 @@
 ///|
 pub fn LunaTokenizerWorker::new(
   spec : TokenizerSpec,
-  input_capacity~ : Int,
-  output_capacity~ : Int,
+  input_capacity~ : Int32,
+  output_capacity~ : Int32,
   budget : LunaTokenizerStepBudget,
 ) -> LunaTokenizerWorker raise TokenizerError {
   if input_capacity <= 0 ||
@@ -97,7 +97,7 @@ pub fn LunaTokenizerWorker::begin_bytes(
   self : LunaTokenizerWorker,
   input : Bytes,
   special_policy~ : SpecialTokenPolicy,
-  output_limit~ : Int,
+  output_limit~ : Int32,
   truncation~ : TruncationPolicy,
 ) -> LunaTokenizerWork raise TokenizerError {
   let write = self.begin_luna_input(
@@ -128,14 +128,14 @@ fn LunaTokenizerWork::require_worker(
 ///|
 pub fn LunaTokenizerWork::last_work_units(
   self : LunaTokenizerWork,
-) -> Int raise TokenizerError {
+) -> Int32 raise TokenizerError {
   self.require_worker().last_work_units
 }
 
 ///|
 pub fn LunaTokenizerWork::token_count(
   self : LunaTokenizerWork,
-) -> Int raise TokenizerError {
+) -> Int32 raise TokenizerError {
   let worker = self.require_worker()
   if worker.phase != LUNA_WORKER_READY {
     raise LunaTokenizerWorkerNotReady
@@ -149,7 +149,7 @@ pub fn LunaTokenizerWork::token_count(
 /// stale work credits retain the existing typed error.
 pub fn LunaTokenizerWork::token_status(
   self : LunaTokenizerWork,
-  index : Int,
+  index : Int32,
 ) -> LunaTokenizerTokenStatus raise TokenizerError {
   let worker = self.require_worker()
   if worker.phase != LUNA_WORKER_READY ||
@@ -163,10 +163,10 @@ pub fn LunaTokenizerWork::token_status(
 ///|
 pub fn LunaTokenizerWork::copy_tokens_to(
   self : LunaTokenizerWork,
-  destination : FixedArray[Int],
-  source_offset~ : Int,
-  destination_offset~ : Int,
-  length~ : Int,
+  destination : FixedArray[Int32],
+  source_offset~ : Int32,
+  destination_offset~ : Int32,
+  length~ : Int32,
 ) -> Unit raise TokenizerError {
   let worker = self.require_worker()
   if worker.phase != LUNA_WORKER_READY {

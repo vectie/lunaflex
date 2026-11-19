@@ -1,19 +1,19 @@
 ///|
 fn finish_luna_input_work(
   work : LunaTokenizerWork,
-  input_bytes : Int,
+  input_bytes : Int32,
 ) -> EncodeResult raise {
   while work.progress() is LunaTokenizerPending {
 
   }
   let count = work.token_count()
-  let tokens : Array[Int] = []
+  let tokens : Array[Int32] = []
   for index in 0..<count {
     let status = work.token_status(index)
     assert_true(status.is_ready())
     tokens.push(status.token_id())
   }
-  { token_ids: tokens, input_bytes, truncated: work.was_truncated() }
+  { token_ids: tokens, input_bytes, truncated: work.was_truncated(), }
 }
 
 ///|
@@ -21,9 +21,9 @@ fn run_luna_input_writer(
   spec : TokenizerSpec,
   input : Bytes,
   special_policy : SpecialTokenPolicy,
-  output_limit : Int,
+  output_limit : Int32,
   truncation : TruncationPolicy,
-  budget_units : Int,
+  budget_units : Int32,
 ) -> EncodeResult raise {
   let worker = LunaTokenizerWorker::new(
     spec,

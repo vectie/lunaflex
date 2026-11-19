@@ -6,7 +6,7 @@ pub fn OrderedKernelLaunch::new(
   dimensions : KernelLaunchDimensions,
   arguments : KernelArguments,
 ) -> OrderedKernelLaunch {
-  { function, dimensions, arguments }
+  { function, dimensions, arguments, }
 }
 
 ///|
@@ -18,14 +18,14 @@ pub fn Context::create_ordered_kernel_executor(
   self : Context,
   stream : Stream,
   launches : ArrayView[OrderedKernelLaunch],
-  policy? : OrderedKernelExecutionPolicy = OrderedKernelEagerOnly,
+  policy~ : OrderedKernelExecutionPolicy = OrderedKernelEagerOnly,
 ) -> OrderedKernelExecutor raise DeviceError {
   if launches.is_empty() {
     raise InvalidArgument(OrderedExecutorCreate)
   }
   let functions : Array[@cuda.Function] = []
-  let dimensions : Array[Int] = []
-  let argument_starts : Array[Int] = [0]
+  let dimensions : Array[Int32] = []
+  let argument_starts : Array[Int32] = [0]
   let allocations : Array[@cuda.Allocation] = []
   let offsets : Array[Int64] = []
   let byte_counts : Array[Int64] = []
@@ -91,7 +91,7 @@ pub fn Context::create_ordered_kernel_executor(
 /// Enqueues exactly the next prevalidated record without synchronizing.
 pub fn OrderedKernelExecutor::enqueue(
   self : OrderedKernelExecutor,
-  index : Int,
+  index : Int32,
 ) -> Unit raise DeviceError {
   if index < 0 || index >= self.kernel_count {
     raise InvalidArgument(OrderedExecutorEnqueue)
@@ -181,7 +181,9 @@ pub fn OrderedKernelExecutor::close(
 }
 
 ///|
-pub fn OrderedKernelExecutor::kernel_count(self : OrderedKernelExecutor) -> Int {
+pub fn OrderedKernelExecutor::kernel_count(
+  self : OrderedKernelExecutor,
+) -> Int32 {
   self.kernel_count
 }
 

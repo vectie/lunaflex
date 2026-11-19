@@ -1,8 +1,8 @@
 ///|
 extern "c" fn raw_test_retryable_lifecycle(
-  cycles : Int,
-  failure_kind : Int,
-) -> Int = "lunaflex_cuda_test_retryable_lifecycle"
+  cycles : Int32,
+  failure_kind : Int32,
+) -> Int32 = "lunaflex_cuda_test_retryable_lifecycle"
 
 ///|
 test "native cleanup remains retryable and retains parents" {

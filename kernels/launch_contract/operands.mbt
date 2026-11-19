@@ -1,5 +1,5 @@
 ///|
-const ABSOLUTE_MAX_OPERANDS_PER_CONTRACT : Int = 32
+const ABSOLUTE_MAX_OPERANDS_PER_CONTRACT : Int32 = 32
 
 ///|
 /// Semantic address passed at one position in an AOT kernel parameter array.
@@ -36,7 +36,7 @@ pub fn AotOperand::new(
     (alignment & (alignment - 1L)) != 0L {
     raise InvalidOperandDefinition(InvalidAlignment)
   }
-  { role, byte_count, alignment }
+  { role, byte_count, alignment, }
 }
 
 ///|

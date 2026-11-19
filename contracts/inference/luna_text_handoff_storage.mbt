@@ -78,9 +78,9 @@ fn LunaTextRequestHandoffStorage::reset_scalars(self : Self) -> Unit {
 ///|
 pub fn LunaTextRequestHandoffStorage::begin(
   self : Self,
-  prompt_byte_limit~ : Int,
-  stop_token_count~ : Int,
-  stop_string_count~ : Int,
+  prompt_byte_limit~ : Int32,
+  stop_token_count~ : Int32,
+  stop_string_count~ : Int32,
   request_id~ : RequestId,
   effective~ : EffectiveLimits,
   sampling~ : LunaValidatedSampling,
@@ -123,5 +123,5 @@ pub fn LunaTextRequestHandoffStorage::begin(
   self.deadline = deadline
   self.semantic_writes.push(semantic_write)
   self.phase = LUNA_TEXT_HANDOFF_WRITING
-  { storage: self, epoch: self.epoch }
+  { storage: self, epoch: self.epoch, }
 }

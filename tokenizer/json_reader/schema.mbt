@@ -1,30 +1,30 @@
 ///|
 priv struct AddedSpecial {
-  id : Int
+  id : Int32
   content : String
   piece : Bytes
-  source_index : Int
+  source_index : Int32
 }
 
 ///|
 priv enum TokenizerJsonProfile {
   ByteLevelJson
-  SentencePieceJson(bos_token_id~ : Int)
+  SentencePieceJson(bos_token_id~ : Int32)
 }
 
 ///|
 fn parse_added_tokens(
   root : Map[String, Json],
   limits : @tokenizer.TokenizerLimits,
-) -> Map[Int, AddedSpecial] raise TokenizerJsonError {
+) -> Map[Int32, AddedSpecial] raise TokenizerJsonError {
   guard require_field(root, "added_tokens", Root, AddedTokens) is Array(entries) else {
     raise InvalidField(component=Root, field=AddedTokens, index=0)
   }
   if entries.length() > limits.max_special_tokens {
     raise AddedTokenLimitExceeded(limit=limits.max_special_tokens)
   }
-  let by_id : Map[Int, AddedSpecial] = Map([], capacity=entries.length())
-  let content_ids : Map[String, Int] = Map([], capacity=entries.length())
+  let by_id : Map[Int32, AddedSpecial] = Map([], capacity=entries.length())
+  let content_ids : Map[String, Int32] = Map([], capacity=entries.length())
   for index, value in entries {
     guard value is Object(entry) else {
       raise InvalidField(component=AddedToken, field=AddedTokens, index~)
@@ -73,7 +73,7 @@ fn parse_added_tokens(
       raise InvalidField(component=AddedToken, field=Id, index~)
     }
     let piece = @utf8.encode(content)
-    by_id[id] = { id, content, piece, source_index: index }
+    by_id[id] = { id, content, piece, source_index: index, }
     content_ids[content] = id
   }
   by_id

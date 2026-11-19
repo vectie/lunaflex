@@ -10,7 +10,10 @@ fn Scheduler::allocate_request_generation(
 }
 
 ///|
-fn Scheduler::find_request(self : Scheduler, id : @inference.RequestId) -> Int {
+fn Scheduler::find_request(
+  self : Scheduler,
+  id : @inference.RequestId,
+) -> Int32 {
   for index in 0..<self.slot_states.length() {
     if self.slot_states[index] != SLOT_FREE &&
       self.slot_states[index] != SLOT_RETIRED {
@@ -24,7 +27,7 @@ fn Scheduler::find_request(self : Scheduler, id : @inference.RequestId) -> Int {
 }
 
 ///|
-fn Scheduler::allocate_slot(self : Scheduler) -> Int raise SchedulerError {
+fn Scheduler::allocate_slot(self : Scheduler) -> Int32 raise SchedulerError {
   if self.free_head == NO_INDEX {
     raise invalid(RequestCapacity, Exhausted)
   }
@@ -39,7 +42,7 @@ fn Scheduler::allocate_slot(self : Scheduler) -> Int raise SchedulerError {
 }
 
 ///|
-fn Scheduler::recycle_slot(self : Scheduler, index : Int) -> Unit {
+fn Scheduler::recycle_slot(self : Scheduler, index : Int32) -> Unit {
   if self.prefix_entry_indices[index] != NO_INDEX ||
     (try! self.request_tables.is_occupied(index)) {
     abort("scheduler prefix recycle ownership invariant")
@@ -79,14 +82,14 @@ fn Scheduler::recycle_slot(self : Scheduler, index : Int) -> Unit {
 }
 
 ///|
-fn Scheduler::terminal_available(self : Scheduler) -> Int {
+fn Scheduler::terminal_available(self : Scheduler) -> Int32 {
   self.terminal_request_ids.length() - self.terminal_count
 }
 
 ///|
 fn Scheduler::preflight_publications(
   self : Scheduler,
-  count : Int,
+  count : Int32,
 ) -> Unit raise SchedulerError {
   if count < 0 || self.publication_cursor > MAX_GENERATION - count.to_uint64() {
     raise invalid(PublicationSequence, Exhausted)
@@ -105,7 +108,7 @@ fn Scheduler::allocate_publication_sequence(
 ///|
 fn Scheduler::enqueue_terminal(
   self : Scheduler,
-  slot : Int,
+  slot : Int32,
   request_id : @inference.RequestId,
   generation : @inference.RequestGeneration,
   reason : TerminalReason,
@@ -130,7 +133,7 @@ fn Scheduler::enqueue_terminal(
 }
 
 ///|
-fn ceiling_pages(tokens : Int, tokens_per_page : Int) -> Int {
+fn ceiling_pages(tokens : Int32, tokens_per_page : Int32) -> Int32 {
   (tokens - 1) / tokens_per_page + 1
 }
 

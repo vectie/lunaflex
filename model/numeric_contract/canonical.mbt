@@ -9,10 +9,10 @@ fn operation_execution_domain() -> Bytes {
 }
 
 ///|
-const TENSOR_STORAGE_CANONICAL_LENGTH : Int = 45
+const TENSOR_STORAGE_CANONICAL_LENGTH : Int32 = 45
 
 ///|
-const OPERATION_EXECUTION_CANONICAL_LENGTH : Int = 51
+const OPERATION_EXECUTION_CANONICAL_LENGTH : Int32 = 51
 
 ///|
 fn write_tensor_storage_contract(
@@ -34,7 +34,7 @@ fn write_tensor_storage_contract(
 ///|
 fn tensor_storage_contract_byte_at(
   contract : TensorStorageContract,
-  index : Int,
+  index : Int32,
 ) -> Byte {
   let domain = tensor_storage_domain()
   if index < domain.length() {
@@ -82,7 +82,7 @@ fn write_operation_execution_contract(
 ///|
 fn operation_execution_contract_byte_at(
   contract : OperationExecutionContract,
-  index : Int,
+  index : Int32,
 ) -> Byte {
   let domain = operation_execution_domain()
   if index < domain.length() {
@@ -131,13 +131,13 @@ fn build_tensor_storage_contract(
     codebook_layout,
     conversion,
     canonical_length: TENSOR_STORAGE_CANONICAL_LENGTH,
-    digest: { value: "" },
+    digest: { value: "", },
   }
   let writer = NumericCanonicalWriter::new_hashing(
     TENSOR_STORAGE_CANONICAL_LENGTH,
   )
   try! write_tensor_storage_contract(writer, placeholder)
-  { ..placeholder, digest: { value: try! writer.finish_hex() } }
+  { ..placeholder, digest: { value: try! writer.finish_hex(), }, }
 }
 
 ///|
@@ -161,13 +161,13 @@ fn build_operation_execution_contract(
     conversion,
     order,
     canonical_length: OPERATION_EXECUTION_CANONICAL_LENGTH,
-    digest: { value: "" },
+    digest: { value: "", },
   }
   let writer = NumericCanonicalWriter::new_hashing(
     OPERATION_EXECUTION_CANONICAL_LENGTH,
   )
   try! write_operation_execution_contract(writer, placeholder)
-  { ..placeholder, digest: { value: try! writer.finish_hex() } }
+  { ..placeholder, digest: { value: try! writer.finish_hex(), }, }
 }
 
 ///|
@@ -176,7 +176,7 @@ fn is_lower_sha256(value : StringView) -> Bool {
     return false
   }
   for unit in value {
-    if !(unit is ('0'..='9' | 'a'..='f')) {
+    if !(unit is ('0'..<='9' | 'a'..<='f')) {
       return false
     }
   }
@@ -228,8 +228,8 @@ fn digest_bytes(bytes : Bytes) -> String {
 fn require_domain(
   canonical : Bytes,
   domain : Bytes,
-  tag_count : Int,
-) -> Int raise NumericContractError {
+  tag_count : Int32,
+) -> Int32 raise NumericContractError {
   if canonical.length() != domain.length() + tag_count {
     raise InvalidNumericContract(CanonicalBytes)
   }
@@ -244,12 +244,12 @@ fn require_domain(
 ///|
 fn decoded_conversion(
   canonical : Bytes,
-  offset : Int,
+  offset : Int32,
 ) -> NumericConversion raise NumericContractError {
   NumericConversion::new(
-    rounding={ value: canonical[offset].to_int() },
-    saturation={ value: canonical[offset + 1].to_int() },
-    finite_values={ value: canonical[offset + 2].to_int() },
+    rounding={ value: canonical[offset].to_int(), },
+    saturation={ value: canonical[offset + 1].to_int(), },
+    finite_values={ value: canonical[offset + 2].to_int(), },
   )
 }
 
@@ -263,12 +263,12 @@ pub fn load_tensor_storage_contract(
   }
   let offset = require_domain(canonical, tensor_storage_domain(), 9)
   let contract = TensorStorageContract::new(
-    dtype={ value: canonical[offset].to_int() },
-    layout={ value: canonical[offset + 1].to_int() },
-    encoding={ value: canonical[offset + 2].to_int() },
-    scale_granularity={ value: canonical[offset + 3].to_int() },
-    zero_point={ value: canonical[offset + 4].to_int() },
-    codebook_layout={ value: canonical[offset + 5].to_int() },
+    dtype={ value: canonical[offset].to_int(), },
+    layout={ value: canonical[offset + 1].to_int(), },
+    encoding={ value: canonical[offset + 2].to_int(), },
+    scale_granularity={ value: canonical[offset + 3].to_int(), },
+    zero_point={ value: canonical[offset + 4].to_int(), },
+    codebook_layout={ value: canonical[offset + 5].to_int(), },
     conversion=decoded_conversion(canonical, offset + 6),
   )
   if contract.canonical_bytes() != canonical {
@@ -287,14 +287,14 @@ pub fn load_operation_execution_contract(
   }
   let offset = require_domain(canonical, operation_execution_domain(), 10)
   let contract = OperationExecutionContract::new(
-    activation_input={ value: canonical[offset].to_int() },
-    activation_compute={ value: canonical[offset + 1].to_int() },
-    activation_scale={ value: canonical[offset + 2].to_int() },
-    tensor_input={ value: canonical[offset + 3].to_int() },
-    accumulator={ value: canonical[offset + 4].to_int() },
-    output={ value: canonical[offset + 5].to_int() },
+    activation_input={ value: canonical[offset].to_int(), },
+    activation_compute={ value: canonical[offset + 1].to_int(), },
+    activation_scale={ value: canonical[offset + 2].to_int(), },
+    tensor_input={ value: canonical[offset + 3].to_int(), },
+    accumulator={ value: canonical[offset + 4].to_int(), },
+    output={ value: canonical[offset + 5].to_int(), },
     conversion=decoded_conversion(canonical, offset + 6),
-    order={ value: canonical[offset + 9].to_int() },
+    order={ value: canonical[offset + 9].to_int(), },
   )
   if contract.canonical_bytes() != canonical {
     raise InvalidNumericContract(CanonicalBytes)

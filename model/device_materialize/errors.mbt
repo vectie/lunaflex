@@ -8,11 +8,11 @@ pub(all) suberror DeviceWeightError {
   InvalidAlignment
   InvalidArenaLimit
   EmptyBindings
-  MissingBinding(reference~ : Int)
-  BindingOrderMismatch(reference~ : Int)
-  LayoutSizeOverflow(reference~ : Int)
+  MissingBinding(reference~ : Int32)
+  BindingOrderMismatch(reference~ : Int32)
+  LayoutSizeOverflow(reference~ : Int32)
   ArenaTooLarge
-  TensorLengthMismatch(reference~ : Int)
+  TensorLengthMismatch(reference~ : Int32)
   InvalidFileLimit(DeviceWeightFileLimit)
   FileUnavailable
   FileCloseFailed

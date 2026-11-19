@@ -1,8 +1,8 @@
 ///|
-extern "c" fn raw_test_ordered_executor(cycles : Int) -> Int = "lunaflex_cuda_test_ordered_executor"
+extern "c" fn raw_test_ordered_executor(cycles : Int32) -> Int32 = "lunaflex_cuda_test_ordered_executor"
 
 ///|
-extern "c" fn raw_test_ordered_graph(cycles : Int) -> Int = "lunaflex_cuda_test_ordered_graph"
+extern "c" fn raw_test_ordered_graph(cycles : Int32) -> Int32 = "lunaflex_cuda_test_ordered_graph"
 
 ///|
 test "ordered executor retains leases and completes by poll or abort" {

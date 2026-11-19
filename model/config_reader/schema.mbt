@@ -116,8 +116,8 @@ fn validate_inert_fields(
 ///|
 fn validate_llama_semantics(
   object : Map[String, Json],
-  hidden_size : Int,
-  attention_heads : Int,
+  hidden_size : Int32,
+  attention_heads : Int32,
 ) -> Unit raise ModelConfigReaderError {
   require_single_architecture(object, "LlamaForCausalLM")
   if require_string(object, "model_type", ModelType) != "llama" {

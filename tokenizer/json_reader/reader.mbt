@@ -4,8 +4,8 @@ pub fn parse_bytes(
   document : BytesView,
   digest~ : @tokenizer.TokenizerDigest,
   limits~ : @tokenizer.TokenizerLimits,
-  max_bytes~ : Int,
-  max_depth~ : Int,
+  max_bytes~ : Int32,
+  max_depth~ : Int32,
 ) -> @tokenizer.TokenizerSpec raise TokenizerJsonError {
   validate_reader_limits(max_bytes, max_depth)
   if document.length() > max_bytes {
@@ -21,8 +21,8 @@ pub fn parse_string(
   document : StringView,
   digest~ : @tokenizer.TokenizerDigest,
   limits~ : @tokenizer.TokenizerLimits,
-  max_bytes~ : Int,
-  max_depth~ : Int,
+  max_bytes~ : Int32,
+  max_depth~ : Int32,
 ) -> @tokenizer.TokenizerSpec raise TokenizerJsonError {
   validate_reader_limits(max_bytes, max_depth)
   validate_utf8_size(document, max_bytes)
@@ -34,7 +34,7 @@ fn parse_text(
   document : StringView,
   digest : @tokenizer.TokenizerDigest,
   limits : @tokenizer.TokenizerLimits,
-  max_depth : Int,
+  max_depth : Int32,
 ) -> @tokenizer.TokenizerSpec raise TokenizerJsonError {
   @json_guard.reject_duplicate_object_keys(document, max_depth~) catch {
     InvalidDepthLimit => raise InvalidDepthLimit

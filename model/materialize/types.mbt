@@ -1,8 +1,8 @@
 ///|
 /// Startup bounds for a complete safetensors materialization operation.
 pub struct MaterializationLimits {
-  priv max_header_bytes : Int
-  priv max_tensor_count : Int
+  priv max_header_bytes : Int32
+  priv max_tensor_count : Int32
   priv max_payload_bytes : Int64
   priv max_host_bytes : Int64
 } derive(Debug, Eq)
@@ -63,8 +63,8 @@ pub struct HostMaterialization {
 ///|
 /// Constructs explicit startup materialization limits.
 pub fn MaterializationLimits::new(
-  max_header_bytes~ : Int,
-  max_tensor_count~ : Int,
+  max_header_bytes~ : Int32,
+  max_tensor_count~ : Int32,
   max_payload_bytes~ : Int64,
   max_host_bytes~ : Int64,
 ) -> MaterializationLimits raise MaterializationError {
@@ -80,20 +80,20 @@ pub fn MaterializationLimits::new(
   if max_host_bytes <= 0L || max_host_bytes > max_payload_bytes {
     raise InvalidLimit(HostBytes)
   }
-  { max_header_bytes, max_tensor_count, max_payload_bytes, max_host_bytes }
+  { max_header_bytes, max_tensor_count, max_payload_bytes, max_host_bytes, }
 }
 
 ///|
 pub fn MaterializationLimits::max_header_bytes(
   self : MaterializationLimits,
-) -> Int {
+) -> Int32 {
   self.max_header_bytes
 }
 
 ///|
 pub fn MaterializationLimits::max_tensor_count(
   self : MaterializationLimits,
-) -> Int {
+) -> Int32 {
   self.max_tensor_count
 }
 
@@ -162,7 +162,7 @@ pub fn TensorReceipt::checksum(self : TensorReceipt) -> TensorChecksum {
 }
 
 ///|
-pub fn MaterializationReport::length(self : MaterializationReport) -> Int {
+pub fn MaterializationReport::length(self : MaterializationReport) -> Int32 {
   self.tensors.length()
 }
 
@@ -209,7 +209,7 @@ pub fn HostTensor::checksum(self : HostTensor) -> TensorChecksum {
 }
 
 ///|
-pub fn HostMaterialization::length(self : HostMaterialization) -> Int {
+pub fn HostMaterialization::length(self : HostMaterialization) -> Int32 {
   self.tensors.length()
 }
 

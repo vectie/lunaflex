@@ -68,7 +68,7 @@ fn validate_template_item(
   value : Json,
   field_name : String,
   expected_id : String,
-  expected_type_id : Int,
+  expected_type_id : Int32,
 ) -> Unit raise TokenizerJsonError {
   let wrapper = require_component_object(value, PostProcessor)
   validate_fields(wrapper, PostProcessor, [field_name])
@@ -87,7 +87,7 @@ fn validate_template_item(
 ///|
 fn validate_sentencepiece_post_processor(
   value : Json,
-) -> Int raise TokenizerJsonError {
+) -> Int32 raise TokenizerJsonError {
   let object = require_component_object(value, PostProcessor)
   validate_fields(object, PostProcessor, [
     "type", "single", "pair", "special_tokens",

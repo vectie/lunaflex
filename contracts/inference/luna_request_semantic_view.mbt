@@ -26,7 +26,7 @@ pub fn LunaRequestSemanticLease::view(
   self : LunaRequestSemanticLease,
 ) -> LunaRequestSemanticView raise InferenceContractError {
   ignore(self.require_storage())
-  { storage: self.storage, epoch: self.epoch }
+  { storage: self.storage, epoch: self.epoch, }
 }
 
 ///|
@@ -35,7 +35,7 @@ pub fn LunaRequestSemanticLease::stop_token_view(
   self : LunaRequestSemanticLease,
 ) -> LunaRequestStopTokenView raise InferenceContractError {
   ignore(self.require_storage())
-  { storage: self.storage, epoch: self.epoch }
+  { storage: self.storage, epoch: self.epoch, }
 }
 
 ///|
@@ -45,7 +45,7 @@ pub fn LunaRequestSemanticLease::prefix_view(
   self : LunaRequestSemanticLease,
 ) -> LunaRequestPrefixView raise InferenceContractError {
   ignore(self.require_storage())
-  { storage: self.storage, epoch: self.epoch }
+  { storage: self.storage, epoch: self.epoch, }
 }
 
 ///|
@@ -83,7 +83,7 @@ pub fn LunaRequestPrefixView::cache_permission(
 /// Returns the validated ASCII scope length after authenticating the epoch.
 pub fn LunaRequestPrefixView::scope_length(
   self : LunaRequestPrefixView,
-) -> Int raise InferenceContractError {
+) -> Int32 raise InferenceContractError {
   if !self.is_live() {
     raise invalid(LunaRequestSemantic, LunaStorageStale, 0)
   }
@@ -94,7 +94,7 @@ pub fn LunaRequestPrefixView::scope_length(
 /// Reads one validated ASCII scope byte. Stale authentication precedes bounds.
 pub fn LunaRequestPrefixView::scope_byte_at(
   self : LunaRequestPrefixView,
-  index : Int,
+  index : Int32,
 ) -> Byte raise InferenceContractError {
   if !self.is_live() {
     raise invalid(LunaRequestSemantic, LunaStorageStale, 0)
@@ -134,15 +134,15 @@ pub fn LunaRequestSemanticView::cache_permission(
 ///|
 pub fn LunaRequestSemanticView::stop_token_count(
   self : LunaRequestSemanticView,
-) -> Int raise InferenceContractError {
+) -> Int32 raise InferenceContractError {
   self.require_storage().stop_token_count
 }
 
 ///|
 pub fn LunaRequestSemanticView::stop_token_at(
   self : LunaRequestSemanticView,
-  index : Int,
-) -> Int raise InferenceContractError {
+  index : Int32,
+) -> Int32 raise InferenceContractError {
   let storage = self.require_storage()
   if index < 0 || index >= storage.stop_token_count {
     raise invalid(LunaRequestSemantic, LunaStorageLifecycle, index)
@@ -153,15 +153,15 @@ pub fn LunaRequestSemanticView::stop_token_at(
 ///|
 pub fn LunaRequestSemanticView::stop_string_count(
   self : LunaRequestSemanticView,
-) -> Int raise InferenceContractError {
+) -> Int32 raise InferenceContractError {
   self.require_storage().stop_string_count
 }
 
 ///|
 pub fn LunaRequestSemanticView::stop_string_length(
   self : LunaRequestSemanticView,
-  index : Int,
-) -> Int raise InferenceContractError {
+  index : Int32,
+) -> Int32 raise InferenceContractError {
   let storage = self.require_storage()
   if index < 0 || index >= storage.stop_string_count {
     raise invalid(LunaRequestSemantic, LunaStorageLifecycle, index)
@@ -172,8 +172,8 @@ pub fn LunaRequestSemanticView::stop_string_length(
 ///|
 pub fn LunaRequestSemanticView::stop_string_byte_at(
   self : LunaRequestSemanticView,
-  string_index~ : Int,
-  byte_index~ : Int,
+  string_index~ : Int32,
+  byte_index~ : Int32,
 ) -> Byte raise InferenceContractError {
   let storage = self.require_storage()
   if string_index < 0 || string_index >= storage.stop_string_count {
@@ -190,14 +190,14 @@ pub fn LunaRequestSemanticView::stop_string_byte_at(
 ///|
 pub fn LunaRequestSemanticView::cache_scope_length(
   self : LunaRequestSemanticView,
-) -> Int raise InferenceContractError {
+) -> Int32 raise InferenceContractError {
   self.require_storage().cache_scope_length
 }
 
 ///|
 pub fn LunaRequestSemanticView::cache_scope_byte_at(
   self : LunaRequestSemanticView,
-  index : Int,
+  index : Int32,
 ) -> Byte raise InferenceContractError {
   let storage = self.require_storage()
   if index < 0 || index >= storage.cache_scope_length {
@@ -213,10 +213,10 @@ pub fn LunaRequestSemanticView::cache_scope_byte_at(
 fn LunaRequestSemanticStorage::stop_token_status(
   self : LunaRequestSemanticStorage,
   epoch : UInt64,
-  token_id : Int,
+  token_id : Int32,
 ) -> LunaRequestSemanticStopTokenStatus {
   if !self.is_current_epoch(epoch) || self.phase != LUNA_REQUEST_SEMANTIC_LEASED {
-    return { state: 2, work_units: 0 }
+    return { state: 2, work_units: 0, }
   }
   let mut low = 0
   let mut high = self.stop_token_count
@@ -226,7 +226,7 @@ fn LunaRequestSemanticStorage::stop_token_status(
     used += 1
     let candidate = self.sorted_stop_tokens[middle]
     if candidate == token_id {
-      return { state: 0, work_units: used }
+      return { state: 0, work_units: used, }
     }
     if candidate < token_id {
       low = middle + 1
@@ -234,13 +234,13 @@ fn LunaRequestSemanticStorage::stop_token_status(
       high = middle
     }
   }
-  { state: 1, work_units: used }
+  { state: 1, work_units: used, }
 }
 
 ///|
 pub fn LunaRequestSemanticView::is_stop_token(
   self : LunaRequestSemanticView,
-  token_id : Int,
+  token_id : Int32,
 ) -> LunaRequestSemanticStopTokenStatus {
   self.storage.stop_token_status(self.epoch, token_id)
 }
@@ -258,7 +258,7 @@ pub fn LunaRequestStopTokenView::is_live(
 /// Bounded authenticated membership without exposing token storage.
 pub fn LunaRequestStopTokenView::is_stop_token(
   self : LunaRequestStopTokenView,
-  token_id : Int,
+  token_id : Int32,
 ) -> LunaRequestSemanticStopTokenStatus {
   self.storage.stop_token_status(self.epoch, token_id)
 }
@@ -276,7 +276,7 @@ pub fn LunaRequestStopTokenView::retain_into(
 ///|
 /// Allocates one empty owner cell during enclosing-owner startup.
 pub fn LunaRequestStopTokenRetentionSlot::new() -> LunaRequestStopTokenRetentionSlot {
-  { storage: None, epoch: 0UL, retention_id: 0UL }
+  { storage: None, epoch: 0UL, retention_id: 0UL, }
 }
 
 ///|
@@ -314,12 +314,12 @@ pub fn LunaRequestStopTokenRetentionSlot::is_live(
 /// Bounded membership through this transferred owner cell.
 pub fn LunaRequestStopTokenRetentionSlot::is_stop_token(
   self : LunaRequestStopTokenRetentionSlot,
-  token_id : Int,
+  token_id : Int32,
 ) -> LunaRequestSemanticStopTokenStatus {
   match self.storage {
     Some(storage) if self.is_live() =>
       storage.stop_token_status(self.epoch, token_id)
-    _ => { state: 2, work_units: 0 }
+    _ => { state: 2, work_units: 0, }
   }
 }
 

@@ -90,26 +90,26 @@ pub(all) enum MergePart {
 pub(all) suberror TokenizerJsonError {
   InvalidByteLimit
   InvalidDepthLimit
-  ByteLimitExceeded(limit~ : Int)
+  ByteLimitExceeded(limit~ : Int32)
   InvalidUtf8
-  NestingLimitExceeded(limit~ : Int)
-  DuplicateField(depth~ : Int, index~ : Int)
+  NestingLimitExceeded(limit~ : Int32)
+  DuplicateField(depth~ : Int32, index~ : Int32)
   MalformedJson
   NonObjectRoot
-  UnknownField(component~ : JsonComponent, index~ : Int)
+  UnknownField(component~ : JsonComponent, index~ : Int32)
   MissingField(component~ : JsonComponent, field~ : JsonField)
-  InvalidField(component~ : JsonComponent, field~ : JsonField, index~ : Int)
+  InvalidField(component~ : JsonComponent, field~ : JsonField, index~ : Int32)
   UnsupportedSemantics(
     component~ : JsonComponent,
     feature~ : UnsupportedFeature
   )
-  VocabularyLimitExceeded(limit~ : Int)
-  MergeLimitExceeded(limit~ : Int)
-  AddedTokenLimitExceeded(limit~ : Int)
-  InvalidByteLevelPiece(entry_index~ : Int, character_index~ : Int)
-  AddedTokenNotInVocabulary(index~ : Int)
-  AddedTokenContentMismatch(index~ : Int)
-  MalformedMerge(index~ : Int)
-  UnknownMergePiece(index~ : Int, part~ : MergePart)
+  VocabularyLimitExceeded(limit~ : Int32)
+  MergeLimitExceeded(limit~ : Int32)
+  AddedTokenLimitExceeded(limit~ : Int32)
+  InvalidByteLevelPiece(entry_index~ : Int32, character_index~ : Int32)
+  AddedTokenNotInVocabulary(index~ : Int32)
+  AddedTokenContentMismatch(index~ : Int32)
+  MalformedMerge(index~ : Int32)
+  UnknownMergePiece(index~ : Int32, part~ : MergePart)
   Validation(@tokenizer.TokenizerError)
 } derive(Debug, Eq)

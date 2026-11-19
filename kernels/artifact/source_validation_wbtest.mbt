@@ -1,7 +1,7 @@
 ///|
 fn source_entry(
-  family : Int,
-  entry : Int,
+  family : Int32,
+  entry : Int32,
   symbol : String,
 ) -> KernelEntryPointInput raise {
   KernelEntryPointInput::new(

@@ -5,8 +5,8 @@
 #inline(never)
 fn preferred_before(
   logits : ArrayView[Double],
-  left_token : Int,
-  right_token : Int,
+  left_token : Int32,
+  right_token : Int32,
 ) -> Bool {
   let left = logits[left_token]
   let right = logits[right_token]
@@ -17,8 +17,8 @@ fn preferred_before(
 #inline(never)
 fn worse_than(
   logits : ArrayView[Double],
-  left_token : Int,
-  right_token : Int,
+  left_token : Int32,
+  right_token : Int32,
 ) -> Bool {
   preferred_before(logits, right_token, left_token)
 }
@@ -27,10 +27,10 @@ fn worse_than(
 /// Repairs a heap whose root is the canonically worst retained candidate.
 #inline(never)
 fn sift_worst_down(
-  token_ids : FixedArray[Int],
+  token_ids : FixedArray[Int32],
   logits : ArrayView[Double],
-  start : Int,
-  end : Int,
+  start : Int32,
+  end : Int32,
 ) -> Unit {
   let mut root = start
   while root * 2 + 1 <= end {
@@ -51,9 +51,9 @@ fn sift_worst_down(
 ///|
 #inline(never)
 fn make_worst_heap(
-  token_ids : FixedArray[Int],
+  token_ids : FixedArray[Int32],
   logits : ArrayView[Double],
-  count : Int,
+  count : Int32,
 ) -> Unit {
   if count <= 1 {
     return
@@ -72,9 +72,9 @@ fn make_worst_heap(
 /// Converts an existing worst-root heap into canonical best-first order.
 #inline(never)
 fn drain_worst_heap(
-  token_ids : FixedArray[Int],
+  token_ids : FixedArray[Int32],
   logits : ArrayView[Double],
-  count : Int,
+  count : Int32,
 ) -> Unit {
   let mut end = count - 1
   while end > 0 {
@@ -89,9 +89,9 @@ fn drain_worst_heap(
 /// collection or recursive call stack.
 #inline(never)
 fn sort_candidates(
-  token_ids : FixedArray[Int],
+  token_ids : FixedArray[Int32],
   logits : ArrayView[Double],
-  count : Int,
+  count : Int32,
 ) -> Unit {
   make_worst_heap(token_ids, logits, count)
   drain_worst_heap(token_ids, logits, count)
@@ -102,10 +102,10 @@ fn sort_candidates(
 /// The first `count` scratch entries finish in the same order as a full sort.
 #inline(never)
 fn select_top_k_candidates(
-  token_ids : FixedArray[Int],
+  token_ids : FixedArray[Int32],
   logits : ArrayView[Double],
-  token_count : Int,
-  count : Int,
+  token_count : Int32,
+  count : Int32,
   scratch : SamplerScratch,
 ) -> Unit {
   for token_id in 0..<count {
@@ -130,8 +130,8 @@ fn select_top_k_candidates(
 #inline(never)
 fn prepare_candidate_order(
   logits : ArrayView[Double],
-  token_count : Int,
-  top_k_count : Int,
+  token_count : Int32,
+  top_k_count : Int32,
   has_restrictive_top_k~ : Bool,
   scratch : SamplerScratch,
 ) -> Unit {

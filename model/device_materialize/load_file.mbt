@@ -13,9 +13,9 @@ fn open_weight_file(
 fn read_weight_range(
   file : @approved_fs.ApprovedFile,
   destination : FixedArray[Byte],
-  destination_offset : Int,
+  destination_offset : Int32,
   position : Int64,
-  byte_count : Int,
+  byte_count : Int32,
 ) -> Unit raise DeviceWeightError {
   file.read_exactly_at(destination, destination_offset~, byte_count~, position~) catch {
     Truncated => raise FileTruncated
@@ -79,7 +79,7 @@ fn device_weight_preparation(
 ) -> DeviceWeightPreparation {
   match loaded {
     ResourceReady(ready) =>
-      WeightsReady({ allocation: ready.resource, layout: ready.layout })
+      WeightsReady({ allocation: ready.resource, layout: ready.layout, })
     ResourceCleanupRequired(failed) =>
       WeightsCleanupRequired({
         allocation: failed.resource,

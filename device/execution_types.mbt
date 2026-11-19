@@ -62,7 +62,7 @@ pub(all) suberror DeviceError {
 /// by a live context. This value owns no native resource and grants no launch,
 /// memory, or context authority.
 pub struct ContextDeviceIdentity {
-  priv ordinal : Int
+  priv ordinal : Int32
   priv name : String
   priv uuid : String
   priv pci : String
@@ -70,7 +70,7 @@ pub struct ContextDeviceIdentity {
 } derive(Debug, Eq)
 
 ///|
-pub fn ContextDeviceIdentity::ordinal(self : ContextDeviceIdentity) -> Int {
+pub fn ContextDeviceIdentity::ordinal(self : ContextDeviceIdentity) -> Int32 {
   self.ordinal
 }
 
@@ -112,7 +112,7 @@ pub struct Context {
 }
 
 ///|
-pub fn Context::ordinal(self : Context) -> Int {
+pub fn Context::ordinal(self : Context) -> Int32 {
   self.identity.ordinal()
 }
 
@@ -182,7 +182,7 @@ pub struct OrderedKernelLaunch {
 /// leases, and one reusable completion event for an exact stream.
 pub struct OrderedKernelExecutor {
   priv raw : @cuda.OrderedKernelExecutor
-  priv kernel_count : Int
+  priv kernel_count : Int32
   priv mode : OrderedKernelExecutionMode
 }
 

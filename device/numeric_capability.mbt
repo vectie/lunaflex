@@ -11,18 +11,18 @@ pub(all) enum DeviceNumericFeature {
 ///|
 /// Stable version of the device numeric-capability record.
 pub struct DeviceNumericCapabilityVersion {
-  priv value : Int
+  priv value : Int32
 } derive(Debug, Eq)
 
 ///|
 pub fn DeviceNumericCapabilityVersion::v1() -> DeviceNumericCapabilityVersion {
-  { value: 1 }
+  { value: 1, }
 }
 
 ///|
 pub fn DeviceNumericCapabilityVersion::as_int(
   self : DeviceNumericCapabilityVersion,
-) -> Int {
+) -> Int32 {
   self.value
 }
 
@@ -47,8 +47,8 @@ pub fn DeviceNumericCapabilityDigest::as_hex(
 pub struct DeviceNumericCapability {
   priv version : DeviceNumericCapabilityVersion
   priv feature : DeviceNumericFeature
-  priv compute_major : Int
-  priv compute_minor : Int
+  priv compute_major : Int32
+  priv compute_minor : Int32
   priv supports_bf16 : Bool
   priv supports_cublas_lt : Bool
   priv canonical : Bytes
@@ -68,7 +68,7 @@ pub(all) suberror DeviceNumericCapabilityError {
 } derive(Debug, Eq)
 
 ///|
-fn fp8_e4m3_architecture_allowed_v1(major : Int, minor : Int) -> Bool {
+fn fp8_e4m3_architecture_allowed_v1(major : Int32, minor : Int32) -> Bool {
   // Capability policy v1 is intentionally closed over exact target pairs.
   // New architectures require a new reviewed entry plus artifact and physical
   // evidence; numeric ordering must never imply forward compatibility.
@@ -79,8 +79,8 @@ fn fp8_e4m3_architecture_allowed_v1(major : Int, minor : Int) -> Bool {
 
 ///|
 fn symmetric_i8_weight_only_architecture_allowed_v1(
-  major : Int,
-  minor : Int,
+  major : Int32,
+  minor : Int32,
 ) -> Bool {
   // This is a closed software target-admission allowlist, not evidence of
   // physical kernel support or readiness. Ordering never implies support.
@@ -90,7 +90,7 @@ fn symmetric_i8_weight_only_architecture_allowed_v1(
 }
 
 ///|
-fn append_numeric_int(output : Array[Byte], value : Int) -> Unit {
+fn append_numeric_int(output : Array[Byte], value : Int32) -> Unit {
   for byte in Int64::from_int(value).reinterpret_as_uint64().to_le_bytes() {
     output.push(byte)
   }
@@ -144,7 +144,7 @@ fn publish_device_numeric_capability(
     supports_bf16: capability.supports_bf16(),
     supports_cublas_lt: capability.supports_cublas_lt(),
     canonical,
-    digest: { value: @crypto.bytes_to_hex_string(@crypto.sha256(canonical)) },
+    digest: { value: @crypto.bytes_to_hex_string(@crypto.sha256(canonical)), },
   }
 }
 
@@ -213,14 +213,14 @@ pub fn DeviceNumericCapability::feature(
 ///|
 pub fn DeviceNumericCapability::compute_major(
   self : DeviceNumericCapability,
-) -> Int {
+) -> Int32 {
   self.compute_major
 }
 
 ///|
 pub fn DeviceNumericCapability::compute_minor(
   self : DeviceNumericCapability,
-) -> Int {
+) -> Int32 {
   self.compute_minor
 }
 

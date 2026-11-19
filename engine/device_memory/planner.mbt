@@ -2,10 +2,10 @@
 const MAX_INT64 : Int64 = 9223372036854775807L
 
 ///|
-const MAX_OPERATIONS : Int = 4096
+const MAX_OPERATIONS : Int32 = 4096
 
 ///|
-const MAX_ACTIVATION_INPUTS : Int = 8192
+const MAX_ACTIVATION_INPUTS : Int32 = 8192
 
 ///|
 const BF16_BYTES : Int64 = 2L
@@ -20,7 +20,7 @@ priv struct FreeBlock {
 priv struct ActiveBlock {
   offset : Int64
   byte_length : Int64
-  live_through_step : Int
+  live_through_step : Int32
 }
 
 ///|
@@ -152,7 +152,7 @@ fn insert_free_block(free : Array[FreeBlock], block : FreeBlock) -> Unit {
 fn release_completed(
   active : Array[ActiveBlock],
   free : Array[FreeBlock],
-  step : Int,
+  step : Int32,
 ) -> Array[ActiveBlock] {
   let retained : Array[ActiveBlock] = []
   for block in active {
@@ -199,7 +199,7 @@ fn take_best_fit(free : Array[FreeBlock], required : Int64) -> Int64? {
 }
 
 ///|
-fn slot_for_offset(slot_offsets : Array[Int64], offset : Int64) -> Int {
+fn slot_for_offset(slot_offsets : Array[Int64], offset : Int64) -> Int32 {
   for index, candidate in slot_offsets {
     if candidate == offset {
       return index
@@ -310,7 +310,7 @@ pub fn plan(
   let token_rows = token_row_envelope(static_plan)
   let logical_sizes : Array[Int64] = []
   let reserved_sizes : Array[Int64] = []
-  let last_uses : Array[Int] = []
+  let last_uses : Array[Int32] = []
   let mut activation_input_count = 0
   for index, operation in operations {
     if operation.id().as_int() != index {
@@ -380,7 +380,7 @@ pub fn plan(
     let reference = operation.outputs()[0]
     regions.push({
       reference,
-      slot: { value: slot_for_offset(slot_offsets, offset) },
+      slot: { value: slot_for_offset(slot_offsets, offset), },
       offset_bytes: offset,
       logical_bytes: logical_sizes[index],
       reserved_bytes: required,

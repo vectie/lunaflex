@@ -1,8 +1,8 @@
 ///|
 fn PrefixIndex::has_new_root_room(
   self : PrefixIndex,
-  token_count : Int,
-  page_count : Int,
+  token_count : Int32,
+  page_count : Int32,
 ) -> Bool {
   self.free_root() >= 0 &&
   self.free_entry() >= 0 &&
@@ -14,8 +14,8 @@ fn PrefixIndex::has_new_root_room(
 ///|
 fn PrefixIndex::preflight_new_root(
   self : PrefixIndex,
-  token_count : Int,
-  page_count : Int,
+  token_count : Int32,
+  page_count : Int32,
 ) -> Unit raise PrefixIndexError {
   if !self.has_new_root_room(token_count, page_count) {
     raise Exhausted
@@ -26,7 +26,7 @@ fn PrefixIndex::preflight_new_root(
 fn PrefixIndex::install_request_root(
   self : PrefixIndex,
   key : PrefixRequestKey,
-) -> Int raise PrefixIndexError {
+) -> Int32 raise PrefixIndexError {
   if !key.is_live() {
     raise StaleKey
   }
@@ -84,7 +84,7 @@ fn PrefixIndex::publish_plan_matches(
   key : PrefixRequestKey,
   tokens : PrefixTokenBuffer,
   pages : PrefixPublishBuffer,
-  priority : Int,
+  priority : Int32,
 ) -> Bool raise PrefixIndexError {
   if tokens.length() != self.publish_plan_token_count ||
     pages.length() != self.publish_plan_page_count ||
@@ -162,7 +162,7 @@ pub fn PrefixPublishStart::plan(
   if self.state != 0 {
     raise StalePublishPlan
   }
-  { owner: self.owner, generation: self.generation, key: self.key }
+  { owner: self.owner, generation: self.generation, key: self.key, }
 }
 
 ///|
@@ -185,7 +185,7 @@ pub fn PrefixIndex::try_plan_publish(
   key : PrefixRequestKey,
   tokens : PrefixTokenBuffer,
   pages : PrefixPublishBuffer,
-  priority~ : Int,
+  priority~ : Int32,
 ) -> PrefixPublishStart raise PrefixIndexError {
   if self.publish_plan_active || self.eviction_plan_active {
     raise PublishPlanBusy
@@ -222,9 +222,9 @@ pub fn PrefixIndex::try_plan_publish(
   let root = self.find_request_root(key)
   let preflight : PrefixExistingPublishPreflight = if root < 0 {
     if self.has_new_root_room(tokens.length(), pages.length()) {
-      { state: 0, duplicate_entry: -1 }
+      { state: 0, duplicate_entry: -1, }
     } else {
-      { state: 2, duplicate_entry: -1 }
+      { state: 2, duplicate_entry: -1, }
     }
   } else {
     self.existing_publish_preflight(root, tokens, page_size)
@@ -285,7 +285,7 @@ pub fn PrefixIndex::publish(
   plan : PrefixPublishPlan,
   tokens : PrefixTokenBuffer,
   pages : PrefixPublishBuffer,
-  priority~ : Int,
+  priority~ : Int32,
 ) -> PrefixEntryId raise PrefixIndexError {
   self.require_publish_plan(plan)
   let key = plan.key

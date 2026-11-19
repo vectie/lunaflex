@@ -15,7 +15,7 @@ fn scheduler_plan_buffer_binding(
   if plan_a_identity.same_owner(plan_b_identity) {
     abort("scheduler plan-buffer binding identity invariant")
   }
-  { plan_a_identity, plan_b_identity }
+  { plan_a_identity, plan_b_identity, }
 }
 
 ///|
@@ -23,7 +23,7 @@ fn scheduler_plan_buffer_binding(
 /// Production schedulers own one A/B pair for bounded plan overlap.
 pub fn SchedulerPlanBufferBinding::count(
   self : SchedulerPlanBufferBinding,
-) -> Int {
+) -> Int32 {
   ignore(self)
   2
 }

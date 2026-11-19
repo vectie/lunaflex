@@ -1,13 +1,13 @@
 ///|
 /// Version of the serialized catalog contract.
 pub struct CatalogVersion {
-  priv value : Int
+  priv value : Int32
 } derive(Debug, Eq)
 
 ///|
 /// Semantic version of one operation implementation contract.
 pub struct KernelSemanticVersion {
-  priv value : Int
+  priv value : Int32
 } derive(Debug, Eq)
 
 ///|
@@ -22,7 +22,7 @@ pub struct AotArtifactDigest {
 /// The integer is scoped by the module digest. It identifies an ABI family,
 /// not a concrete launch shape or CUDA symbol.
 pub struct AotKernelFamilyId {
-  priv value : Int
+  priv value : Int32
 } derive(Debug, Eq, Hash)
 
 ///|
@@ -35,7 +35,7 @@ pub struct AotKernelFamily {
 ///|
 /// Stable identity of one callable entry point within an AOT kernel family.
 pub struct AotKernelEntryPointId {
-  priv value : Int
+  priv value : Int32
 } derive(Debug, Eq, Hash)
 
 ///|
@@ -55,7 +55,7 @@ pub(all) enum KernelImplementationId {
 
 ///|
 pub fn CatalogVersion::from_stable_int(
-  value : Int,
+  value : Int32,
 ) -> CatalogVersion raise CatalogError {
   if value <= 0 {
     raise InvalidCatalog(NonPositiveVersion)
@@ -65,29 +65,29 @@ pub fn CatalogVersion::from_stable_int(
 
 ///|
 pub fn CatalogVersion::v1() -> CatalogVersion {
-  { value: 1 }
+  { value: 1, }
 }
 
 ///|
 /// Catalog contract whose entries name the complete paged-KV semantic ABI.
 pub fn CatalogVersion::v3() -> CatalogVersion {
-  { value: 3 }
+  { value: 3, }
 }
 
 ///|
 /// Catalog contract whose entries bind the exact numeric operation ABI.
 pub fn CatalogVersion::v4() -> CatalogVersion {
-  { value: 4 }
+  { value: 4, }
 }
 
 ///|
-pub fn CatalogVersion::as_int(self : CatalogVersion) -> Int {
+pub fn CatalogVersion::as_int(self : CatalogVersion) -> Int32 {
   self.value
 }
 
 ///|
 pub fn KernelSemanticVersion::from_stable_int(
-  value : Int,
+  value : Int32,
 ) -> KernelSemanticVersion raise CatalogError {
   if value <= 0 {
     raise InvalidCatalog(NonPositiveVersion)
@@ -97,23 +97,23 @@ pub fn KernelSemanticVersion::from_stable_int(
 
 ///|
 pub fn KernelSemanticVersion::v1() -> KernelSemanticVersion {
-  { value: 1 }
+  { value: 1, }
 }
 
 ///|
 /// Paged-KV operation ABI with ordered live inputs and persistent state.
 pub fn KernelSemanticVersion::v3() -> KernelSemanticVersion {
-  { value: 3 }
+  { value: 3, }
 }
 
 ///|
 /// Paged-KV operation ABI bound to one exact numeric execution digest.
 pub fn KernelSemanticVersion::v4() -> KernelSemanticVersion {
-  { value: 4 }
+  { value: 4, }
 }
 
 ///|
-pub fn KernelSemanticVersion::as_int(self : KernelSemanticVersion) -> Int {
+pub fn KernelSemanticVersion::as_int(self : KernelSemanticVersion) -> Int32 {
   self.value
 }
 
@@ -123,7 +123,7 @@ fn is_lower_sha256(value : String) -> Bool {
     return false
   }
   for character in value {
-    if !(character is ('0'..='9') || character is ('a'..='f')) {
+    if !(character is ('0'..<='9') || character is ('a'..<='f')) {
       return false
     }
   }
@@ -147,7 +147,7 @@ pub fn AotArtifactDigest::sha256(self : AotArtifactDigest) -> String {
 
 ///|
 pub fn AotKernelFamilyId::from_stable_int(
-  value : Int,
+  value : Int32,
 ) -> AotKernelFamilyId raise CatalogError {
   if value <= 0 {
     raise InvalidCatalog(InvalidAotFamilyId)
@@ -156,7 +156,7 @@ pub fn AotKernelFamilyId::from_stable_int(
 }
 
 ///|
-pub fn AotKernelFamilyId::as_int(self : AotKernelFamilyId) -> Int {
+pub fn AotKernelFamilyId::as_int(self : AotKernelFamilyId) -> Int32 {
   self.value
 }
 
@@ -165,7 +165,7 @@ pub fn AotKernelFamily::new(
   module_digest~ : AotArtifactDigest,
   family_id~ : AotKernelFamilyId,
 ) -> AotKernelFamily {
-  { module_digest, family_id }
+  { module_digest, family_id, }
 }
 
 ///|
@@ -182,7 +182,7 @@ pub fn AotKernelFamily::family_id(self : AotKernelFamily) -> AotKernelFamilyId {
 
 ///|
 pub fn AotKernelEntryPointId::from_stable_int(
-  value : Int,
+  value : Int32,
 ) -> AotKernelEntryPointId raise CatalogError {
   if value <= 0 {
     raise InvalidCatalog(InvalidAotEntryPointId)
@@ -191,7 +191,7 @@ pub fn AotKernelEntryPointId::from_stable_int(
 }
 
 ///|
-pub fn AotKernelEntryPointId::as_int(self : AotKernelEntryPointId) -> Int {
+pub fn AotKernelEntryPointId::as_int(self : AotKernelEntryPointId) -> Int32 {
   self.value
 }
 
@@ -200,7 +200,7 @@ pub fn AotKernelEntryPoint::new(
   family~ : AotKernelFamily,
   entry_point_id~ : AotKernelEntryPointId,
 ) -> AotKernelEntryPoint {
-  { family, entry_point_id }
+  { family, entry_point_id, }
 }
 
 ///|

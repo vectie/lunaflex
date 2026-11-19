@@ -177,7 +177,7 @@ fn bind_operand(
 fn function_blueprint_index(
   functions : Array[FunctionBlueprint],
   identity : @catalog.AotKernelEntryPoint,
-) -> Int? {
+) -> Int32? {
   for index, function in functions {
     if function.identity == identity {
       return Some(index)
@@ -191,7 +191,7 @@ fn append_function_blueprint(
   artifacts : @artifact.KernelArtifactBundle,
   functions : Array[FunctionBlueprint],
   identity : @catalog.AotKernelEntryPoint,
-) -> Int raise DeviceExecutorError {
+) -> Int32 raise DeviceExecutorError {
   if function_blueprint_index(functions, identity) is Some(index) {
     return index
   }
@@ -205,7 +205,7 @@ fn append_function_blueprint(
   if module_image.digest() != identity.family().module_digest() {
     raise InvalidPlan(ArtifactModule)
   }
-  functions.push({ identity, module_index, symbol: entry.function_symbol() })
+  functions.push({ identity, module_index, symbol: entry.function_symbol(), })
   functions.length() - 1
 }
 

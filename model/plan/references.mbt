@@ -1,7 +1,7 @@
 ///|
 /// Stable position of an operation in an ordered model plan.
 pub struct OperationId {
-  priv value : Int
+  priv value : Int32
 } derive(Debug, Eq)
 
 ///|
@@ -10,7 +10,7 @@ pub struct OperationId {
 /// The reference is semantic plan data. It is not a tensor, allocation,
 /// address, file offset, or device handle.
 pub struct TensorRef {
-  priv value : Int
+  priv value : Int32
 } derive(Debug, Eq)
 
 ///|
@@ -34,7 +34,7 @@ pub struct CodebookTensorRef {
 ///|
 /// Stable reference to an intermediate value produced by an earlier operation.
 pub struct ActivationRef {
-  priv value : Int
+  priv value : Int32
 } derive(Debug, Eq)
 
 ///|
@@ -44,7 +44,7 @@ pub struct ActivationRef {
 /// validation binds the complete ordered attention graph to the cache geometry
 /// so later planners never recover a layer by counting operations.
 pub struct KvLayerId {
-  priv value : Int
+  priv value : Int32
 } derive(Debug, Eq)
 
 ///|
@@ -92,11 +92,11 @@ pub(all) enum PersistentStateAccess {
 ///
 /// IDs identify behavior, never a vendor API or a concrete kernel artifact.
 pub struct KernelCapabilityId {
-  priv value : Int
+  priv value : Int32
 } derive(Debug, Eq)
 
 ///|
-pub fn OperationId::new(value : Int) -> OperationId raise PlanValidationError {
+pub fn OperationId::new(value : Int32) -> OperationId raise PlanValidationError {
   if value < 0 {
     raise InvalidIdentifier(Operation)
   }
@@ -104,12 +104,12 @@ pub fn OperationId::new(value : Int) -> OperationId raise PlanValidationError {
 }
 
 ///|
-pub fn OperationId::as_int(self : OperationId) -> Int {
+pub fn OperationId::as_int(self : OperationId) -> Int32 {
   self.value
 }
 
 ///|
-pub fn TensorRef::new(value : Int) -> TensorRef raise PlanValidationError {
+pub fn TensorRef::new(value : Int32) -> TensorRef raise PlanValidationError {
   if value < 0 {
     raise InvalidIdentifier(Tensor)
   }
@@ -117,7 +117,7 @@ pub fn TensorRef::new(value : Int) -> TensorRef raise PlanValidationError {
 }
 
 ///|
-pub fn TensorRef::as_int(self : TensorRef) -> Int {
+pub fn TensorRef::as_int(self : TensorRef) -> Int32 {
   self.value
 }
 
@@ -153,7 +153,7 @@ pub fn CodebookTensorRef::tensor(self : CodebookTensorRef) -> TensorRef {
 
 ///|
 pub fn ActivationRef::new(
-  value : Int,
+  value : Int32,
 ) -> ActivationRef raise PlanValidationError {
   if value < 0 {
     raise InvalidIdentifier(Activation)
@@ -162,12 +162,12 @@ pub fn ActivationRef::new(
 }
 
 ///|
-pub fn ActivationRef::as_int(self : ActivationRef) -> Int {
+pub fn ActivationRef::as_int(self : ActivationRef) -> Int32 {
   self.value
 }
 
 ///|
-pub fn KvLayerId::new(value : Int) -> KvLayerId raise PlanValidationError {
+pub fn KvLayerId::new(value : Int32) -> KvLayerId raise PlanValidationError {
   if value < 0 {
     raise InvalidIdentifier(KvLayer)
   }
@@ -175,13 +175,13 @@ pub fn KvLayerId::new(value : Int) -> KvLayerId raise PlanValidationError {
 }
 
 ///|
-pub fn KvLayerId::as_int(self : KvLayerId) -> Int {
+pub fn KvLayerId::as_int(self : KvLayerId) -> Int32 {
   self.value
 }
 
 ///|
 pub fn KernelCapabilityId::from_stable_int(
-  value : Int,
+  value : Int32,
 ) -> KernelCapabilityId raise PlanValidationError {
   if value <= 0 {
     raise InvalidIdentifier(KernelCapability)
@@ -190,66 +190,66 @@ pub fn KernelCapabilityId::from_stable_int(
 }
 
 ///|
-pub fn KernelCapabilityId::as_int(self : KernelCapabilityId) -> Int {
+pub fn KernelCapabilityId::as_int(self : KernelCapabilityId) -> Int32 {
   self.value
 }
 
 ///|
 /// Semantic capability 1: gather model-width rows from an embedding table.
 pub fn KernelCapabilityId::embedding_lookup() -> KernelCapabilityId {
-  { value: 1 }
+  { value: 1, }
 }
 
 ///|
 /// Semantic capability 2: root-mean-square normalization.
 pub fn KernelCapabilityId::rms_norm() -> KernelCapabilityId {
-  { value: 2 }
+  { value: 2, }
 }
 
 ///|
 /// Semantic capability 3: query, key, and value projection.
 pub fn KernelCapabilityId::qkv_projection() -> KernelCapabilityId {
-  { value: 3 }
+  { value: 3, }
 }
 
 ///|
 /// Semantic capability 4: rotary position transformation.
 pub fn KernelCapabilityId::rotary_embedding() -> KernelCapabilityId {
-  { value: 4 }
+  { value: 4, }
 }
 
 ///|
 /// Semantic capability 5: causal grouped-query attention.
 pub fn KernelCapabilityId::causal_attention() -> KernelCapabilityId {
-  { value: 5 }
+  { value: 5, }
 }
 
 ///|
 /// Semantic capability 6: dense matrix projection.
 pub fn KernelCapabilityId::dense_projection() -> KernelCapabilityId {
-  { value: 6 }
+  { value: 6, }
 }
 
 ///|
 /// Semantic capability 7: elementwise residual addition.
 pub fn KernelCapabilityId::residual_add() -> KernelCapabilityId {
-  { value: 7 }
+  { value: 7, }
 }
 
 ///|
 /// Semantic capability 8: gated feed-forward transformation.
 pub fn KernelCapabilityId::gated_mlp() -> KernelCapabilityId {
-  { value: 8 }
+  { value: 8, }
 }
 
 ///|
 /// Semantic capability 9: RoPE using explicit per-query positions.
 pub fn KernelCapabilityId::positioned_rotary_embedding() -> KernelCapabilityId {
-  { value: 9 }
+  { value: 9, }
 }
 
 ///|
 /// Semantic capability 10: paged causal attention with persistent KV update.
 pub fn KernelCapabilityId::paged_causal_attention() -> KernelCapabilityId {
-  { value: 10 }
+  { value: 10, }
 }

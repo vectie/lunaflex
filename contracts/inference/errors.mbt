@@ -56,14 +56,14 @@ pub(all) enum ContractIssue {
 /// `index` is a collection position, or zero for a scalar field. No variant
 /// carries an offending value or raw request payload.
 pub(all) suberror InferenceContractError {
-  Invalid(field~ : ContractField, issue~ : ContractIssue, index~ : Int)
+  Invalid(field~ : ContractField, issue~ : ContractIssue, index~ : Int32)
 } derive(Debug, Eq)
 
 ///|
 fn invalid(
   field : ContractField,
   issue : ContractIssue,
-  index : Int,
+  index : Int32,
 ) -> InferenceContractError {
   Invalid(field~, issue~, index~)
 }

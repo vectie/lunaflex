@@ -1,5 +1,5 @@
 ///|
-fn PrefixIndex::eviction_page_count(self : PrefixIndex, entry : Int) -> Int {
+fn PrefixIndex::eviction_page_count(self : PrefixIndex, entry : Int32) -> Int32 {
   let mut count = 0
   let mut node = self.entry_terminals[entry]
   while node >= 0 {
@@ -22,7 +22,7 @@ fn PrefixIndex::eviction_page_count(self : PrefixIndex, entry : Int) -> Int {
 ///|
 fn PrefixIndex::plan_label_pages(
   self : PrefixIndex,
-  node : Int,
+  node : Int32,
   output : PrefixEvictionBuffer,
 ) -> Unit {
   let mut cell = self.node_label_heads[node]
@@ -44,10 +44,10 @@ fn PrefixIndex::plan_label_pages(
 ///|
 fn PrefixIndex::free_planned_label(
   self : PrefixIndex,
-  node : Int,
+  node : Int32,
   output : PrefixEvictionBuffer,
-  page_cursor : Int,
-) -> Int {
+  page_cursor : Int32,
+) -> Int32 {
   let mut cursor = page_cursor
   let mut cell = self.node_label_heads[node]
   for offset in 0..<self.node_label_lengths[node] {
@@ -76,7 +76,7 @@ fn PrefixIndex::free_planned_label(
 }
 
 ///|
-fn PrefixIndex::free_node_descriptor(self : PrefixIndex, node : Int) -> Unit {
+fn PrefixIndex::free_node_descriptor(self : PrefixIndex, node : Int32) -> Unit {
   self.detach_node(node)
   self.node_used[node] = false
   self.node_parents[node] = -1
@@ -98,7 +98,7 @@ fn PrefixIndex::free_node_descriptor(self : PrefixIndex, node : Int) -> Unit {
 ///|
 fn PrefixIndex::release_merged_node_descriptor(
   self : PrefixIndex,
-  node : Int,
+  node : Int32,
 ) -> Unit {
   self.node_used[node] = false
   self.node_parents[node] = -1
@@ -118,7 +118,7 @@ fn PrefixIndex::release_merged_node_descriptor(
 }
 
 ///|
-fn PrefixIndex::merge_unary_node(self : PrefixIndex, node : Int) -> Int {
+fn PrefixIndex::merge_unary_node(self : PrefixIndex, node : Int32) -> Int32 {
   let child = self.single_child(node)
   if child < 0 || self.node_terminals[node] >= 0 {
     abort("prefix unary merge invariant")
@@ -142,7 +142,7 @@ fn PrefixIndex::merge_unary_node(self : PrefixIndex, node : Int) -> Int {
 }
 
 ///|
-fn PrefixIndex::compact_changed_path(self : PrefixIndex, start : Int) -> Unit {
+fn PrefixIndex::compact_changed_path(self : PrefixIndex, start : Int32) -> Unit {
   let mut node = start
   while node >= 0 {
     self.compaction_node_visits += 1
@@ -229,7 +229,7 @@ pub fn PrefixEvictionStart::plan(
   if self.state != 0 {
     raise StaleEvictionPlan
   }
-  { owner: self.owner, generation: self.generation }
+  { owner: self.owner, generation: self.generation, }
 }
 
 ///|
@@ -243,11 +243,11 @@ pub fn PrefixIndex::try_plan_eviction(
     raise EvictionPlanBusy
   }
   if self.eviction_plan_generation == 0xffffffffffffffffUL {
-    return { state: 2, owner: self, generation: self.eviction_plan_generation }
+    return { state: 2, owner: self, generation: self.eviction_plan_generation, }
   }
   let selected = self.eviction_candidate()
   if selected < 0 {
-    return { state: 1, owner: self, generation: self.eviction_plan_generation }
+    return { state: 1, owner: self, generation: self.eviction_plan_generation, }
   }
   let removed_pages = self.eviction_page_count(selected)
   if removed_pages > output.capacity() {
@@ -271,7 +271,7 @@ pub fn PrefixIndex::try_plan_eviction(
   self.eviction_plan_entry_index = selected
   self.eviction_plan_entry_generation = self.entry_generations[selected]
   self.eviction_plan_page_count = output.page_count()
-  { state: 0, owner: self, generation: self.eviction_plan_generation }
+  { state: 0, owner: self, generation: self.eviction_plan_generation, }
 }
 
 ///|

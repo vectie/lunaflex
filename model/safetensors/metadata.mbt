@@ -37,7 +37,7 @@ pub struct TensorMetadata {
 /// Validated immutable safetensors header metadata.
 pub struct SafetensorsMetadata {
   tensors : ReadOnlyArray[TensorMetadata]
-  encoded_header_bytes : Int
+  encoded_header_bytes : Int32
   payload_bytes : Int64
   materialized_tensor_bytes : Int64
 } derive(Debug, Eq)
@@ -51,11 +51,17 @@ pub fn RawTensorMetadata::new(
   data_start~ : Int64,
   data_end~ : Int64,
 ) -> RawTensorMetadata {
-  { name, dtype, shape: ReadOnlyArray::from_array(shape), data_start, data_end }
+  {
+    name,
+    dtype,
+    shape: ReadOnlyArray::from_array(shape),
+    data_start,
+    data_end,
+  }
 }
 
 ///|
-fn valid_tensor_name(name : StringView, max_length : Int) -> Bool {
+fn valid_tensor_name(name : StringView, max_length : Int32) -> Bool {
   !name.is_empty() &&
   name.length() <= max_length &&
   name.all(c => c.is_ascii() && !c.is_ascii_control())
@@ -64,8 +70,8 @@ fn valid_tensor_name(name : StringView, max_length : Int) -> Bool {
 ///|
 fn checked_tensor_bytes(
   shape : ReadOnlyArray[Int64],
-  tensor_index : Int,
-  max_rank : Int,
+  tensor_index : Int32,
+  max_rank : Int32,
 ) -> Int64 raise SafetensorsError {
   if shape.is_empty() || shape.length() > max_rank {
     raise InvalidRank(tensor_index)
@@ -90,7 +96,7 @@ fn checked_tensor_bytes(
 ///|
 fn validate_tensor(
   raw : RawTensorMetadata,
-  tensor_index : Int,
+  tensor_index : Int32,
   payload_bytes : Int64,
   limits : HeaderLimits,
 ) -> TensorMetadata raise SafetensorsError {
@@ -118,7 +124,7 @@ fn validate_tensor(
     name: raw.name,
     dtype: BFloat16,
     shape: raw.shape,
-    byte_range: { start: raw.data_start, end: raw.data_end },
+    byte_range: { start: raw.data_start, end: raw.data_end, },
   }
 }
 
@@ -133,7 +139,7 @@ fn ranges_overlap(left : TensorMetadata, right : TensorMetadata) -> Bool {
 /// the tensor payload.
 pub fn validate_metadata(
   entries : ArrayView[RawTensorMetadata],
-  encoded_header_bytes~ : Int,
+  encoded_header_bytes~ : Int32,
   payload_bytes~ : Int64,
   limits~ : HeaderLimits,
 ) -> SafetensorsMetadata raise SafetensorsError {
@@ -225,14 +231,14 @@ pub fn TensorByteRange::byte_length(self : TensorByteRange) -> Int64 {
 }
 
 ///|
-pub fn SafetensorsMetadata::tensor_count(self : SafetensorsMetadata) -> Int {
+pub fn SafetensorsMetadata::tensor_count(self : SafetensorsMetadata) -> Int32 {
   self.tensors.length()
 }
 
 ///|
 pub fn SafetensorsMetadata::tensor(
   self : SafetensorsMetadata,
-  index : Int,
+  index : Int32,
 ) -> TensorMetadata? {
   self.tensors.get(index)
 }
@@ -253,7 +259,7 @@ pub fn SafetensorsMetadata::find_tensor(
 ///|
 pub fn SafetensorsMetadata::encoded_header_bytes(
   self : SafetensorsMetadata,
-) -> Int {
+) -> Int32 {
   self.encoded_header_bytes
 }
 

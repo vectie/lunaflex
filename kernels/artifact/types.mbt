@@ -37,7 +37,7 @@ pub struct KernelModule {
 /// One admitted immutable mapping from stable identity to bounded CUDA symbol.
 pub struct KernelEntryPoint {
   priv entry_point : @catalog.AotKernelEntryPoint
-  priv module_index : Int
+  priv module_index : Int32
   priv function_symbol : String
 }
 
@@ -58,7 +58,7 @@ pub fn KernelModuleInput::new(
   digest~ : @catalog.AotArtifactDigest,
   module_bytes~ : FixedArray[Byte],
 ) -> KernelModuleInput {
-  { digest, storage: AliasedModule(module_bytes) }
+  { digest, storage: AliasedModule(module_bytes), }
 }
 
 ///|
@@ -70,7 +70,7 @@ pub fn KernelModuleInput::from_bytes(
   digest~ : @catalog.AotArtifactDigest,
   module_bytes~ : Bytes,
 ) -> KernelModuleInput {
-  { digest, storage: OwnedModule(module_bytes) }
+  { digest, storage: OwnedModule(module_bytes), }
 }
 
 ///|
@@ -78,7 +78,7 @@ pub fn KernelEntryPointInput::new(
   entry_point~ : @catalog.AotKernelEntryPoint,
   function_symbol~ : String,
 ) -> KernelEntryPointInput {
-  { entry_point, function_symbol }
+  { entry_point, function_symbol, }
 }
 
 ///|
@@ -113,7 +113,7 @@ pub fn KernelEntryPoint::identity(
 }
 
 ///|
-pub fn KernelEntryPoint::module_index(self : KernelEntryPoint) -> Int {
+pub fn KernelEntryPoint::module_index(self : KernelEntryPoint) -> Int32 {
   self.module_index
 }
 
@@ -184,14 +184,14 @@ pub fn KernelArtifactBundle::entry_point(
 }
 
 ///|
-pub fn KernelArtifactBundle::module_count(self : KernelArtifactBundle) -> Int {
+pub fn KernelArtifactBundle::module_count(self : KernelArtifactBundle) -> Int32 {
   self.modules.length()
 }
 
 ///|
 pub fn KernelArtifactBundle::entry_point_count(
   self : KernelArtifactBundle,
-) -> Int {
+) -> Int32 {
   self.entry_points.length()
 }
 

@@ -54,7 +54,7 @@ pub fn ApprovedRelativeLocator::new(
   value : StringView,
 ) -> ApprovedRelativeLocator raise ApprovedFsError {
   validate_relative_locator(value)
-  { value: value.to_owned() }
+  { value: value.to_owned(), }
 }
 
 ///|
@@ -68,9 +68,9 @@ pub struct ApprovedFile {
 pub struct ApprovedFileStamp {
   priv byte_count : Int64
   priv modified_seconds : Int64
-  priv modified_nanoseconds : Int
+  priv modified_nanoseconds : Int32
   priv changed_seconds : Int64
-  priv changed_nanoseconds : Int
+  priv changed_nanoseconds : Int32
 } derive(Eq)
 
 ///|
